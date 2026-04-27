@@ -427,3 +427,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# spex: generated/local files
+.claude/
+.specify/.spex-phase
+.specify/.spex-state
