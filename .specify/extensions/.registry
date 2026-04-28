@@ -103,6 +103,20 @@
       },
       "registered_skills": [],
       "installed_at": "2026-04-27T17:51:03.958625+00:00"
+    },
+    "gap-audit": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:pending",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.gap-audit.audit"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-27T18:37:00.000000+00:00"
     }
   }
 }

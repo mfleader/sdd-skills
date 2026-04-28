@@ -1,0 +1,23 @@
+schema_version: "1.0"
+
+extension:
+  id: gap-audit
+  name: "SDD Gap Audit"
+  version: "0.1.0"
+  description: "Adversarial gap auditor for SDD artifacts — dispatches a prejudiced subagent to find gaps in specs and plans"
+  author: cc-spex
+  license: MIT
+
+requires:
+  speckit_version: ">=0.5.2"
+
+provides:
+  commands:
+    - name: speckit.gap-audit.audit
+      file: commands/speckit.gap-audit.audit.md
+      description: "Audit SDD artifacts for specification and plan gaps"
+
+tags:
+  - "sdd"
+  - "audit"
+  - "quality"

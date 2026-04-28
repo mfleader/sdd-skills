@@ -26,8 +26,8 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 **Purpose**: Create the extension directory structure and metadata.
 
-- [ ] T001 Create extension directory structure: `.specify/extensions/gap-audit/`, `.specify/extensions/gap-audit/commands/`, `.claude/skills/speckit-gap-audit-audit/`
-- [ ] T002 [P] Create `.specify/extensions/gap-audit/extension.yml` with extension id, name, version 0.1.0, description, speckit >= 0.5.2 requirement, single command registration (`speckit.gap-audit.audit`), no hooks section
+- [X] T001 Create extension directory structure: `.specify/extensions/gap-audit/`, `.specify/extensions/gap-audit/commands/`, `.claude/skills/speckit-gap-audit-audit/`
+- [X] T002 [P] Create `.specify/extensions/gap-audit/extension.yml` with extension id, name, version 0.1.0, description, speckit >= 0.5.2 requirement, single command registration (`speckit.gap-audit.audit`), no hooks section
 
 ---
 
@@ -35,8 +35,8 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 **Purpose**: Base command structure that all user stories build on. MUST complete before any user story.
 
-- [ ] T003 Create `.claude/skills/speckit-gap-audit-audit/SKILL.md` with frontmatter (name, description, compatibility, metadata.source pointing to `gap-audit:commands/speckit.gap-audit.audit.md`, user-invocable: true, disable-model-invocation: false) and body that loads and executes the extension command
-- [ ] T004 Create `.specify/extensions/gap-audit/commands/speckit.gap-audit.audit.md` with: frontmatter (description), argument parsing section ($ARGUMENTS, extract --output flag, extract scope), spec directory resolution (FR-024: argument > feature.json > ask user), artifact file existence checks (FR-013), error messages per contracts/command-schema.md
+- [X] T003 Create `.claude/skills/speckit-gap-audit-audit/SKILL.md` with frontmatter (name, description, compatibility, metadata.source pointing to `gap-audit:commands/speckit.gap-audit.audit.md`, user-invocable: true, disable-model-invocation: false) and body that loads and executes the extension command
+- [X] T004 Create `.specify/extensions/gap-audit/commands/speckit.gap-audit.audit.md` with: frontmatter (description), argument parsing section ($ARGUMENTS, extract --output flag, extract scope), spec directory resolution (FR-024: argument > feature.json > ask user), artifact file existence checks (FR-013), error messages per contracts/command-schema.md
 
 **Checkpoint**: Extension skeleton is installable and command responds to invocation with argument validation.
 
@@ -50,9 +50,9 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Add subagent prompt construction for spec scope to `.specify/extensions/gap-audit/commands/speckit.gap-audit.audit.md`: inline the complete 7-item spec checklist (orphan FRs, weak ACs, unverifiable SCs, cross-reference gaps, implicit assumptions, naming collisions, implicit behavior) with descriptions from data-model.md directly in the prompt, embed full artifact content (spec.md), classification scheme (blocking/non-blocking), GapFinding JSON output format (per data-model.md), DO NOT modify files directive, per-category minimum (FR-021)
-- [ ] T006 [US1] Add subagent dispatch section to command file: Agent tool call with subagent_type `superpowers:code-reviewer`, description `Adversarial gap audit (spec)`, full prompt from T005
-- [ ] T007 [US1] Add response parsing and output formatting to command file per section order in contracts/command-schema.md: (a) parse subagent response defensively — handle valid JSON array, empty array, non-JSON prose, and malformed JSON (log warning and treat as empty on parse failure), (b) group findings by classification (blocking first, then non-blocking), present each with category/description/evidence/suggested_fix, summary line with counts, "No issues found." when empty (FR-011)
+- [X] T005 [US1] Add subagent prompt construction for spec scope to `.specify/extensions/gap-audit/commands/speckit.gap-audit.audit.md`: inline the complete 7-item spec checklist (orphan FRs, weak ACs, unverifiable SCs, cross-reference gaps, implicit assumptions, naming collisions, implicit behavior) with descriptions from data-model.md directly in the prompt, embed full artifact content (spec.md), classification scheme (blocking/non-blocking), GapFinding JSON output format (per data-model.md), DO NOT modify files directive, per-category minimum (FR-021)
+- [X] T006 [US1] Add subagent dispatch section to command file: Agent tool call with subagent_type `superpowers:code-reviewer`, description `Adversarial gap audit (spec)`, full prompt from T005
+- [X] T007 [US1] Add response parsing and output formatting to command file per section order in contracts/command-schema.md: (a) parse subagent response defensively — handle valid JSON array, empty array, non-JSON prose, and malformed JSON (log warning and treat as empty on parse failure), (b) group findings by classification (blocking first, then non-blocking), present each with category/description/evidence/suggested_fix, summary line with counts, "No issues found." when empty (FR-011)
 
 **Checkpoint**: `speckit.gap-audit.audit spec` works end-to-end on a test spec. Findings are presented grouped by blocking/non-blocking.
 
@@ -66,8 +66,8 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Add subagent prompt construction for plan scope to command file: inline the complete 5-item plan checklist (contract tests, integration gaps, edge case coverage, implicit behavior, spec coverage gaps) with descriptions from data-model.md directly in the prompt, embed full artifact content (spec.md, plan.md, tasks.md), same classification scheme and output format as spec scope
-- [ ] T009 [US2] Update subagent dispatch section to branch on scope: spec scope uses spec prompt (T005), plan scope uses plan prompt (T008), artifact loading checks for plan.md and tasks.md when scope is plan
+- [X] T008 [US2] Add subagent prompt construction for plan scope to command file: inline the complete 5-item plan checklist (contract tests, integration gaps, edge case coverage, implicit behavior, spec coverage gaps) with descriptions from data-model.md directly in the prompt, embed full artifact content (spec.md, plan.md, tasks.md), same classification scheme and output format as spec scope
+- [X] T009 [US2] Update subagent dispatch section to branch on scope: spec scope uses spec prompt (T005), plan scope uses plan prompt (T008), artifact loading checks for plan.md and tasks.md when scope is plan
 
 **Checkpoint**: `speckit.gap-audit.audit plan` works end-to-end. Both scopes produce correctly scoped findings.
 
@@ -81,9 +81,9 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Add false positive filters 1-4 to the subagent prompt in the command file (both spec and plan scope prompts). Each filter is an imperative instruction: (1) verify technical claims against actual codebase via grep/read, reject if wrong, (2) cross-reference tasks.md before claiming gaps, reject if task exists (skip in spec scope), (3) distinguish FRs from acceptance scenarios, reframe orphan ACs correctly, (4) split or reject grouped findings with different root causes (FR-022)
-- [ ] T011 [US3] Add false positive filters 5-8 to the subagent prompt: (5) classify pre-existing behavior correctly, (6) accept human-verified criteria with observable outcomes, (7) acknowledge existing coverage before claiming gaps, (8) default to plan-diverges-from-spec framing
-- [ ] T012 [US3] Add unverified finding handling to the subagent prompt: when a filter cannot determine validity, pass finding through with evidence prefixed "unverified: [reason]" (FR-023)
+- [X] T010 [US3] Add false positive filters 1-4 to the subagent prompt in the command file (both spec and plan scope prompts). Each filter is an imperative instruction: (1) verify technical claims against actual codebase via grep/read, reject if wrong, (2) cross-reference tasks.md before claiming gaps, reject if task exists (skip in spec scope), (3) distinguish FRs from acceptance scenarios, reframe orphan ACs correctly, (4) split or reject grouped findings with different root causes (FR-022)
+- [X] T011 [US3] Add false positive filters 5-8 to the subagent prompt: (5) classify pre-existing behavior correctly, (6) accept human-verified criteria with observable outcomes, (7) acknowledge existing coverage before claiming gaps, (8) default to plan-diverges-from-spec framing
+- [X] T012 [US3] Add unverified finding handling to the subagent prompt: when a filter cannot determine validity, pass finding through with evidence prefixed "unverified: [reason]" (FR-023)
 
 **Checkpoint**: Audit produces higher-precision findings. Known false positives are filtered by the subagent.
 
@@ -97,9 +97,9 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 ### Implementation for User Story 4
 
-- [ ] T013 [P] [US4] Add speckit version check to command file per section order in contracts/command-schema.md: first, determine how speckit exposes its version (check for `specify --version`, `.specify/init-options.json` speckit_version field, or environment variable). Then implement the check at invocation, returning a clear error if below 0.5.2 (FR-025)
-- [ ] T014 [P] [US4] Create `.specify/extensions/gap-audit/README.md` with installation instructions, usage examples (both scopes, --output flag), gap-patterns.md format description
-- [ ] T015 [US4] Finalize `.specify/extensions/gap-audit/extension.yml`: verify version 0.1.0, command registration points to correct file, no hooks section present, no `requires.extensions` section, speckit version requirement set
+- [X] T013 [P] [US4] Add speckit version check to command file per section order in contracts/command-schema.md: first, determine how speckit exposes its version (check for `specify --version`, `.specify/init-options.json` speckit_version field, or environment variable). Then implement the check at invocation, returning a clear error if below 0.5.2 (FR-025)
+- [X] T014 [P] [US4] Create `.specify/extensions/gap-audit/README.md` with installation instructions, usage examples (both scopes, --output flag), gap-patterns.md format description
+- [X] T015 [US4] Finalize `.specify/extensions/gap-audit/extension.yml`: verify version 0.1.0, command registration points to correct file, no hooks section present, no `requires.extensions` section, speckit version requirement set
 
 **Checkpoint**: Extension installs cleanly, command is listed, version check rejects old speckit.
 
@@ -113,10 +113,10 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 ### Implementation for User Story 5
 
-- [ ] T016 [US5] Add JSON persistence logic to command file per section order in contracts/command-schema.md: when --output flag is set, write findings array to `<spec_dir>/.sdd-findings-spec.json` (spec scope) or `<spec_dir>/.sdd-findings-plan.json` (plan scope). Overwrite if exists (FR-014). Write empty array when no findings survive filtering. After writing, validate JSON is parseable (SC-006).
-- [ ] T017 [US5] Add gap-patterns.md loading to command file per section order in contracts/command-schema.md: check `specs/gap-patterns.md` (project-level only, not per-feature). If file exists and contains valid patterns (each with name, category, trigger fields), include them in the subagent prompt as additional checklist items. If file is empty or malformed (missing required fields, unparseable structure), log a warning and proceed without patterns.
-- [ ] T018 [US5] Add pattern matching instructions to the subagent prompt: when gap-patterns.md patterns are loaded, instruct the subagent to check each finding against loaded patterns. If a finding's category matches a pattern's category and the description aligns with the pattern's trigger, add `pattern_match` field with the canonical pattern name.
-- [ ] T019 [P] [US5] Create example `specs/gap-patterns.md` with 2-3 sample patterns demonstrating the format: canonical name, category, trigger description
+- [X] T016 [US5] Add JSON persistence logic to command file per section order in contracts/command-schema.md: when --output flag is set, write findings array to `<spec_dir>/.sdd-findings-spec.json` (spec scope) or `<spec_dir>/.sdd-findings-plan.json` (plan scope). Overwrite if exists (FR-014). Write empty array when no findings survive filtering. After writing, validate JSON is parseable (SC-006).
+- [X] T017 [US5] Add gap-patterns.md loading to command file per section order in contracts/command-schema.md: check `specs/gap-patterns.md` (project-level only, not per-feature). If file exists and contains valid patterns (each with name, category, trigger fields), include them in the subagent prompt as additional checklist items. If file is empty or malformed (missing required fields, unparseable structure), log a warning and proceed without patterns.
+- [X] T018 [US5] Add pattern matching instructions to the subagent prompt: when gap-patterns.md patterns are loaded, instruct the subagent to check each finding against loaded patterns. If a finding's category matches a pattern's category and the description aligns with the pattern's trigger, add `pattern_match` field with the canonical pattern name.
+- [X] T019 [P] [US5] Create example `specs/gap-patterns.md` with 2-3 sample patterns demonstrating the format: canonical name, category, trigger description
 
 **Checkpoint**: --output produces valid JSON. Pattern matching tags findings correctly. No JSON written without --output.
 
@@ -126,10 +126,10 @@ All paths relative to repository root. Extension name is `gap-audit`.
 
 **Purpose**: Final validation and documentation.
 
-- [ ] T020 Run quickstart.md validation: walk through each quickstart scenario and verify it works. Include: attempt `specify extension add --dev` to verify SC-004.
-- [ ] T021 Dogfood: run `/speckit.gap-audit.audit spec` on this feature's own spec.md and verify findings quality
-- [ ] T022 Create a test spec at `specs/001-gap-audit-extension/test-fixtures/spec-with-gaps.md` with at least 5 intentionally planted gaps (one per category: orphan FR, weak AC, unverifiable SC, cross-reference gap, implicit assumption). Run the auditor against it and verify it catches them (SC-001) without excessive false positives (SC-002).
-- [ ] T023 Run the auditor on the test spec and verify at least one false positive is filtered out (SC-007).
+- [X] T020 Run quickstart.md validation: walk through each quickstart scenario and verify it works. Include: attempt `specify extension add --dev` to verify SC-004.
+- [X] T021 Dogfood: run `/speckit.gap-audit.audit spec` on this feature's own spec.md and verify findings quality
+- [X] T022 Create a test spec at `specs/001-gap-audit-extension/test-fixtures/spec-with-gaps.md` with at least 5 intentionally planted gaps (one per category: orphan FR, weak AC, unverifiable SC, cross-reference gap, implicit assumption). Run the auditor against it and verify it catches them (SC-001) without excessive false positives (SC-002).
+- [X] T023 Run the auditor on the test spec and verify at least one false positive is filtered out (SC-007).
 
 ---
 
