@@ -101,8 +101,8 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 
 **Follow-up hooks:**
 
-- **FR-012**: After completing (whether additions were applied or all were rejected), backtrace's command file checks `.specify/extensions.yml` for entries under `hooks.after_backtrace` and executes them. Hooks fire regardless of whether additions were applied. This follows the same hook-checking pattern used by the core plan and implement commands (read YAML, filter by `enabled`, handle `optional` flag, skip `condition` evaluation).
-- **FR-013**: Backtrace's `extension.yml` declares `after_backtrace` hooks pointing to review-spec, review-plan, and analyze, so they are registered automatically when the extension is installed. These are soft dependencies: if the hook commands are unavailable (spex-gates not installed), the hooks are skipped with a warning. No error.
+- **FR-012**: After completing (whether additions were applied or all were rejected), the backtrace command file directly invokes follow-up reviews: review-spec, review-plan (plan scope only), and analyze. Before invoking each, it checks the extensions registry (`.specify/extensions/.registry`) for spex-gates availability. This follows the same pattern as review-code invoking deep-review.
+- **FR-013**: Follow-up reviews are a soft dependency on spex-gates. If spex-gates is not installed, follow-ups are skipped with a warning. No error. No hooks are declared in backtrace's extension.yml (speckit's hook schema only allows one command per hook point per extension, making hook-based follow-ups infeasible for three commands).
 
 **Extension packaging:**
 
