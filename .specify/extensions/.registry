@@ -121,7 +121,7 @@
     "gap-audit": {
       "version": "0.1.0",
       "source": "local",
-      "manifest_hash": "sha256:pending",
+      "manifest_hash": "sha256:53962fd081a98d2073e718735bcb3a3ea67ab8467facd6459d25374b48eaa070",
       "enabled": true,
       "priority": 10,
       "registered_commands": {

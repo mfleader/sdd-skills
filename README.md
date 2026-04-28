@@ -156,7 +156,7 @@ sdd-skills/
 │   │   └── constitution.md  # Synced from specs/constitution.md for agent context
 │   └── templates/           # Spec, plan, task templates
 ├── .claude/
-│   └── skills/              # 35 Claude Code skills
+│   └── skills/              # Claude Code skills (auto-generated, gitignored)
 ├── specs/
 │   ├── constitution.md      # Project governance
 │   ├── gap-patterns.md      # Recurring gap audit patterns

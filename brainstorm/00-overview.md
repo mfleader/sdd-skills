@@ -6,13 +6,5 @@ Last updated: 2026-04-28
 
 | # | Date | Topic | Status | Spec |
 |---|------|-------|--------|------|
-| 01 | 2026-04-28 | backtrace-extension | spec-created | 002 |
-
-## Open Threads
-
-- Should `after_backtrace` hooks fire even when no additions were applied? (from #01)
-- Gap-audit `--fix` flag needs its own spec (from #01)
-
-## Parked Ideas
-
-None.
+| 01 | 2026-04-27 | speckit-extension-packaging | completed | specs/001-gap-audit-extension |
+| 02 | 2026-04-28 | backtrace-extension | completed | specs/002-backtrace-extension |

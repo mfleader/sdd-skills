@@ -1,5 +1,4 @@
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
-at specs/002-backtrace-extension/plan.md
+For project context, read specs/constitution.md for governance principles
+and README.md for the SDD workflow, extensions, and project structure.
 <!-- SPECKIT END -->
