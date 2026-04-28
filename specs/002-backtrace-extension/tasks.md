@@ -13,9 +13,9 @@
 
 **Purpose**: Create the extension directory structure and metadata
 
-- [ ] T001 Create extension directory structure: `.specify/extensions/backtrace/commands/`
-- [ ] T002 Create extension.yml at `.specify/extensions/backtrace/extension.yml` per research.md R-005 (schema_version, extension metadata, requires, provides, tags; no hooks section)
-- [ ] T003 [P] Create SKILL.md wrapper at `.claude/skills/speckit-backtrace-trace/SKILL.md` per research.md R-006 (front matter: name, description, compatibility, metadata.source, user-invocable: true, disable-model-invocation: false; body delegates to command file)
+- [X] T001 Create extension directory structure: `.specify/extensions/backtrace/commands/`
+- [X] T002 Create extension.yml at `.specify/extensions/backtrace/extension.yml` per research.md R-005 (schema_version, extension metadata, requires, provides, tags; no hooks section)
+- [X] T003 [P] Create SKILL.md wrapper at `.claude/skills/speckit-backtrace-trace/SKILL.md` per research.md R-006 (front matter: name, description, compatibility, metadata.source, user-invocable: true, disable-model-invocation: false; body delegates to command file)
 
 ---
 
@@ -23,12 +23,12 @@
 
 **Purpose**: Create the command file with all 10 sections as stubs, then fill in the non-story-specific sections
 
-- [ ] T004 Create command file skeleton at `.specify/extensions/backtrace/commands/speckit.backtrace.trace.md` with YAML front matter (`description: "Trace gap-audit findings back to missing spec items and propose additions"`) and 10 section headings matching research.md R-002
-- [ ] T005 Fill Section 1 (Ship Pipeline Guard): check `.specify/.spex-state` for autonomous mode per the pattern in speckit-spex-gates-review-spec (read status and ask fields, set AUTONOMOUS_MODE)
-- [ ] T006 Fill Section 2 (Overview): brief description of backtrace purpose and usage
-- [ ] T007 Fill Section 3 (Prerequisites): speckit version check from `.specify/init-options.json` per FR-015a; validate `.specify/` directory exists
-- [ ] T008 Fill Section 4 (Argument Parsing): parse `$ARGUMENTS` for scope (`spec`/`plan`), optional spec directory path, and `--output` flag handling (error: not supported). Validate scope per FR-002. Error messages per contracts/command-schema.md
-- [ ] T009 Fill Section 5 (Spec Directory Resolution): three-step resolution per FR-002a and research.md R-004 (argument, feature.json, ask user). Validate spec.md exists. For plan scope, validate plan.md and tasks.md exist
+- [X] T004 Create command file skeleton at `.specify/extensions/backtrace/commands/speckit.backtrace.trace.md` with YAML front matter (`description: "Trace gap-audit findings back to missing spec items and propose additions"`) and 10 section headings matching research.md R-002
+- [X] T005 Fill Section 1 (Ship Pipeline Guard): check `.specify/.spex-state` for autonomous mode per the pattern in speckit-spex-gates-review-spec (read status and ask fields, set AUTONOMOUS_MODE)
+- [X] T006 Fill Section 2 (Overview): brief description of backtrace purpose and usage
+- [X] T007 Fill Section 3 (Prerequisites): speckit version check from `.specify/init-options.json` per FR-015a; validate `.specify/` directory exists
+- [X] T008 Fill Section 4 (Argument Parsing): parse `$ARGUMENTS` for scope (`spec`/`plan`), optional spec directory path, and `--output` flag handling (error: not supported). Validate scope per FR-002. Error messages per contracts/command-schema.md
+- [X] T009 Fill Section 5 (Spec Directory Resolution): three-step resolution per FR-002a and research.md R-004 (argument, feature.json, ask user). Validate spec.md exists. For plan scope, validate plan.md and tasks.md exist
 
 **Checkpoint**: Command file has all infrastructure sections filled. Core execution sections (6-10) are stubs.
 
@@ -42,13 +42,13 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Fill Section 5b (Findings Resolution): within the resolved spec directory, check for `.sdd-findings-{scope}.json` per FR-001. If not found, ask user for file path. Validate file exists and is valid GapFinding JSON per data-model.md schema. Handle errors: file not found, invalid format, empty findings list
-- [ ] T011 [US1] Fill Section 6a (Artifact Loading): read spec.md (both scopes) and optionally plan.md + tasks.md (plan scope). Store full content for subagent prompt
-- [ ] T012 [US1] Fill Section 6b (Core Tracing Logic): for each GapFinding, identify which AC/FR/SC should have caught it using the four tracing categories from FR-003 (missing test coverage, missing integration scenario, implicit assumption, edge case). For untraceable findings, propose a new FR or AC. Draft ProposedAddition per data-model.md schema
-- [ ] T013 [US1] Fill Section 7 (Subagent Dispatch): construct the auditor prompt per research.md R-003 and contracts/command-schema.md auditor contract. Include: original findings in XML tags, proposed additions in XML tags, spec artifacts in XML tags, classification instructions (approve/reject/revise), directive "DO NOT modify any files". Dispatch via Agent tool with `subagent_type: "superpowers:code-reviewer"`
-- [ ] T014 [US1] Fill Section 8 (Response Parsing): parse auditor response as JSON array of AuditorVerdict per data-model.md. Handle: valid JSON, non-JSON (extract from prose), malformed JSON (warn, treat as empty), partial responses (apply valid verdicts, warn about rest)
-- [ ] T015 [US1] Fill Section 8b (Apply Additions): for each approved/revised verdict, edit the target artifact (spec.md or tasks.md) to add the content. Preserve existing content per FR-005. For revisions, incorporate the auditor's suggested revision
-- [ ] T016 [US1] Fill Section 9 (Output Formatting): present results per contracts/command-schema.md output format. Applied additions section (with approval status), rejected additions section (with reasons). Post-dispatch verification: `git diff --name-only` to verify no unauthorized file modifications
+- [X] T010 [US1] Fill Section 5b (Findings Resolution): within the resolved spec directory, check for `.sdd-findings-{scope}.json` per FR-001. If not found, ask user for file path. Validate file exists and is valid GapFinding JSON per data-model.md schema. Handle errors: file not found, invalid format, empty findings list
+- [X] T011 [US1] Fill Section 6a (Artifact Loading): read spec.md (both scopes) and optionally plan.md + tasks.md (plan scope). Store full content for subagent prompt
+- [X] T012 [US1] Fill Section 6b (Core Tracing Logic): for each GapFinding, identify which AC/FR/SC should have caught it using the four tracing categories from FR-003 (missing test coverage, missing integration scenario, implicit assumption, edge case). For untraceable findings, propose a new FR or AC. Draft ProposedAddition per data-model.md schema
+- [X] T013 [US1] Fill Section 7 (Subagent Dispatch): construct the auditor prompt per research.md R-003 and contracts/command-schema.md auditor contract. Include: original findings in XML tags, proposed additions in XML tags, spec artifacts in XML tags, classification instructions (approve/reject/revise), directive "DO NOT modify any files". Dispatch via Agent tool with `subagent_type: "superpowers:code-reviewer"`
+- [X] T014 [US1] Fill Section 8 (Response Parsing): parse auditor response as JSON array of AuditorVerdict per data-model.md. Handle: valid JSON, non-JSON (extract from prose), malformed JSON (warn, treat as empty), partial responses (apply valid verdicts, warn about rest)
+- [X] T015 [US1] Fill Section 8b (Apply Additions): for each approved/revised verdict, edit the target artifact (spec.md or tasks.md) to add the content. Preserve existing content per FR-005. For revisions, incorporate the auditor's suggested revision
+- [X] T016 [US1] Fill Section 9 (Output Formatting): present results per contracts/command-schema.md output format. Applied additions section (with approval status), rejected additions section (with reasons). Post-dispatch verification: `git diff --name-only` to verify no unauthorized file modifications
 
 **Checkpoint**: Backtrace can trace findings, get auditor approval, and apply additions to spec.md.
 
@@ -62,9 +62,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Extend Section 6a to load plan.md and tasks.md when scope is `plan`. Include all three artifacts in subagent prompt
-- [ ] T018 [US2] Extend Section 6b tracing logic to propose additions targeting tasks.md (new tasks) in addition to spec.md. Plan.md additions limited to new tasks referencing existing plan phases per FR-004
-- [ ] T019 [US2] Extend Section 8b to apply additions to tasks.md in addition to spec.md
+- [X] T017 [US2] Extend Section 6a to load plan.md and tasks.md when scope is `plan`. Include all three artifacts in subagent prompt
+- [X] T018 [US2] Extend Section 6b tracing logic to propose additions targeting tasks.md (new tasks) in addition to spec.md. Plan.md additions limited to new tasks referencing existing plan phases per FR-004
+- [X] T019 [US2] Extend Section 8b to apply additions to tasks.md in addition to spec.md
 
 **Checkpoint**: Backtrace works for both spec and plan scopes.
 
@@ -78,8 +78,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Verify Section 8b correctly skips rejected additions (no-op for rejects). Verify revisions are incorporated. Add explicit logging for each verdict type
-- [ ] T021 [US3] Add edge case handling: all proposals rejected (report "All proposals rejected" with reasons, no artifacts modified per edge case spec)
+- [X] T020 [US3] Verify Section 8b correctly skips rejected additions (no-op for rejects). Verify revisions are incorporated. Add explicit logging for each verdict type
+- [X] T021 [US3] Add edge case handling: all proposals rejected (report "All proposals rejected" with reasons, no artifacts modified per edge case spec)
 
 **Checkpoint**: Auditor gating is fully functional. Rejects never applied, revisions correctly incorporated.
 
@@ -93,9 +93,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T022 [US4] Fill Section 10 (Follow-Up Invocations): after output formatting, check extensions registry (`.specify/extensions/.registry`) for spex-gates availability per FR-012. If available, invoke review-spec. For plan scope, also invoke review-plan. Invoke analyze if available
-- [ ] T023 [US4] Add soft dependency handling: if spex-gates is not installed, log warning "spex-gates not installed, skipping follow-up reviews" and continue. No error per FR-013
-- [ ] T024 [US4] Handle autonomous mode in follow-up invocations: if AUTONOMOUS_MODE is true from Section 1, suppress user prompts during follow-up invocations
+- [X] T022 [US4] Fill Section 10 (Follow-Up Invocations): after output formatting, check extensions registry (`.specify/extensions/.registry`) for spex-gates availability per FR-012. If available, invoke review-spec. For plan scope, also invoke review-plan. Invoke analyze if available
+- [X] T023 [US4] Add soft dependency handling: if spex-gates is not installed, log warning "spex-gates not installed, skipping follow-up reviews" and continue. No error per FR-013
+- [X] T024 [US4] Handle autonomous mode in follow-up invocations: if AUTONOMOUS_MODE is true from Section 1, suppress user prompts during follow-up invocations
 
 **Checkpoint**: Follow-up reviews fire after backtrace. Graceful degradation when spex-gates absent.
 
@@ -109,8 +109,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T025 [US5] Add Section 8c (Reset Trigger Check) after applying additions: count new user stories, new non-refinement FRs, SC count delta, and material scope expansion per FR-009. Read constitution thresholds from `.specify/memory/constitution.md` if exists; use defaults otherwise
-- [ ] T026 [US5] Add reset trigger output to Section 9: if triggers fired, append "Reset Trigger Warning" section per contracts/command-schema.md output format
+- [X] T025 [US5] Add Section 8c (Reset Trigger Check) after applying additions: count new user stories, new non-refinement FRs, SC count delta, and material scope expansion per FR-009. Read constitution thresholds from `.specify/memory/constitution.md` if exists; use defaults otherwise
+- [X] T026 [US5] Add reset trigger output to Section 9: if triggers fired, append "Reset Trigger Warning" section per contracts/command-schema.md output format
 
 **Checkpoint**: Reset triggers detected and reported. No action taken, user decides.
 
@@ -120,8 +120,8 @@
 
 **Purpose**: Extension README and project README update
 
-- [ ] T027 [P] Create extension README at `.specify/extensions/backtrace/README.md` with: requirements, installation, usage (command syntax and arguments), findings input format, output format, follow-up reviews, artifact interactions per FR-017
-- [ ] T028 [P] Update project README.md: add backtrace to extensions table, add usage examples, add copy-paste installation commands for both gap-audit and backtrace extensions per FR-016
+- [X] T027 [P] Create extension README at `.specify/extensions/backtrace/README.md` with: requirements, installation, usage (command syntax and arguments), findings input format, output format, follow-up reviews, artifact interactions per FR-017
+- [X] T028 [P] Update project README.md: add backtrace to extensions table, add usage examples, add copy-paste installation commands for both gap-audit and backtrace extensions per FR-016
 
 ---
 
