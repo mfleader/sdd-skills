@@ -1,100 +1,32 @@
 # sdd-skills
 
-Extensions for Specification-Driven Development (SDD) built on [speckit](https://github.com/github/spec-kit), a CLI framework for AI agent workflows. SDD treats specifications as the primary artifact: code is derived from specs, and automated gates verify that code stays aligned with the spec at every stage. Everything runs inside Claude Code.
+Custom extensions for [speckit](https://github.com/github/spec-kit), a CLI framework for Specification-Driven Development (SDD) with AI agent workflows.
 
 ## Prerequisites
 
-- [speckit](https://github.com/github/spec-kit) (>= 0.5.2)
+- [speckit](https://github.com/github/spec-kit) (>= 0.5.2) with spex extensions installed
 - [Claude Code](https://claude.ai/claude-code) CLI
-
-## Quick Start
-
-```bash
-# Clone the repo
-git clone git@github.com:mfleader/sdd-skills.git
-cd sdd-skills
-
-# The repo is already initialized. Start with a brainstorm:
-/speckit-spex-brainstorm
-```
-
-Or go fully autonomous from an existing brainstorm document:
-
-```bash
-/speckit-spex-ship brainstorm/001-my-feature.md --ask smart
-```
-
-## The SDD Workflow
-
-Every feature follows the same lifecycle. Each stage produces artifacts that feed the next.
-
-```
-brainstorm ─> specify ─> clarify ─> plan ─> tasks ─> implement ─> review ─> verify
-```
-
-| Stage | Command | What it does | Artifacts produced |
-|-------|---------|-------------|-------------------|
-| Brainstorm | `/speckit-spex-brainstorm` | Explore an idea, refine scope | `brainstorm/NN-topic.md` |
-| Specify | `/speckit-specify` | Create the feature spec | `spec.md`, `checklists/requirements.md` |
-| Clarify | `/speckit-clarify` | Resolve ambiguities in the spec | Updated `spec.md` |
-| Plan | `/speckit-plan` | Design the technical approach | `plan.md`, `research.md`, `data-model.md`, `contracts/` |
-| Tasks | `/speckit-tasks` | Break the plan into actionable tasks | `tasks.md` |
-| Implement | `/speckit-implement` | Execute tasks phase by phase | Source code |
-| Review | *(automatic)* | Spec compliance check after implement | `REVIEW-CODE.md` |
-| Verify | *(automatic)* | Final verification gate | Verification report |
-
-Quality gates (review-spec, review-plan, review-code, verify) run automatically via hooks between stages. You don't need to invoke them manually unless you want to re-run one.
-
-### Autonomous Mode
-
-`/speckit-spex-ship` chains all stages into a single autonomous pipeline. State is tracked in `.specify/.spex-state`, which enables resuming interrupted runs.
-
-```bash
-# Full autopilot from brainstorm to verified code
-/speckit-spex-ship brainstorm/001-my-feature.md --ask smart
-
-# Options:
-#   --ask always   Pause on every finding (full human oversight)
-#   --ask smart    Auto-fix clear issues, pause on ambiguous ones (default)
-#   --ask never    Auto-fix everything, pause only on blockers
-#   --create-pr    Auto-create PR after completion
-#   --resume       Resume an interrupted pipeline
-#   --start-from   Start from a specific stage (specify, clarify, review-spec, plan, tasks, review-plan, implement, review-code, verify)
-```
 
 ## Extensions
 
-The project ships 8 extensions. All are active by default.
+This repo provides two extensions:
 
-| Extension | Description | Key Commands |
-|-----------|-------------|-------------|
-| **spex** | Core SDD workflow orchestration | `brainstorm`, `ship`, `help`, `init`, `evolve`, `extensions` |
-| **spex-gates** | Quality gates at each workflow stage | `review-spec`, `review-plan`, `review-code`, `verify`, `stamp` |
-| **spex-deep-review** | Multi-agent code review (5 specialized agents) with autonomous fix loop | `review` |
-| **spex-teams** | Parallel implementation via agent teams | `orchestrate`, `research`, `implement` |
-| **spex-worktrees** | Git worktree isolation for feature work | `manage` |
-| **git** | Branch creation, auto-commits, validation | `initialize`, `feature`, `commit`, `validate`, `remote` |
-| **gap-audit** | Adversarial gap auditor for specs and plans | `audit` |
-| **backtrace** | Trace gap-audit findings back to spec gaps and propose additions | `trace` |
+| Extension | Description | Command |
+|-----------|-------------|---------|
+| **gap-audit** | Adversarial gap auditor for specs and plans | `/speckit-gap-audit-audit` |
+| **backtrace** | Trace gap-audit findings back to spec gaps and propose additions | `/speckit-backtrace-trace` |
 
-### Managing Extensions
+### Installation
 
 ```bash
-# List installed extensions
-/speckit-spex-extensions
-
-# Enable/disable
-specify extension disable spex-deep-review
-specify extension enable spex-deep-review
-
-# Install from git
-specify extension add gap-audit --from <git-url>
-specify extension add backtrace --from <git-url>
+# Install both extensions from a local clone
+specify extension add /path/to/sdd-skills/.specify/extensions/gap-audit
+specify extension add /path/to/sdd-skills/.specify/extensions/backtrace
 ```
 
 ## Gap Audit
 
-The gap audit extension dispatches an adversarial subagent to find gaps the standard review missed. It supports two scopes:
+Dispatches an adversarial subagent to find gaps the standard review missed.
 
 ```bash
 # Audit a spec for orphan FRs, weak ACs, unverifiable SCs, implicit assumptions, etc.
@@ -103,70 +35,45 @@ The gap audit extension dispatches an adversarial subagent to find gaps the stan
 # Audit plan + tasks for missing contract tests, integration gaps, edge case coverage
 /speckit-gap-audit-audit plan
 
-# Save findings to JSON
+# Save findings to JSON (consumed by backtrace)
 /speckit-gap-audit-audit spec --output
 ```
 
-The auditor applies 8 false positive filters before reporting and groups findings as blocking or non-blocking. See `.specify/extensions/gap-audit/README.md` for details.
+The auditor applies 8 false positive filters and groups findings as blocking or non-blocking. See `.specify/extensions/gap-audit/README.md` for details.
 
 ## Backtrace
 
-The backtrace extension closes the loop between finding gaps and fixing them. It traces gap-audit findings back to the spec artifacts that should have caught them, proposes additions, gets adversarial auditor approval, and applies approved changes.
+Closes the loop between finding gaps and fixing them. Traces gap-audit findings back to the spec artifacts that should have caught them, proposes additions, gets adversarial auditor approval, and applies approved changes.
 
 ```bash
-# First, run gap-audit with --output to persist findings
+# Run gap-audit with --output first to persist findings
 /speckit-gap-audit-audit spec --output
 
 # Then run backtrace to trace and fix the gaps
 /speckit-backtrace-trace spec
 
-# For plan-scope (traces against spec + plan + tasks)
+# Plan-scope (traces against spec + plan + tasks)
 /speckit-gap-audit-audit plan --output
 /speckit-backtrace-trace plan
 ```
 
-After applying additions, backtrace automatically invokes follow-up reviews (review-spec, review-plan, analyze) if spex-gates is installed. See `.specify/extensions/backtrace/README.md` for details.
-
-## Utility Commands
-
-| Command | What it does |
-|---------|-------------|
-| `/speckit-analyze` | Cross-artifact consistency check (spec vs plan vs tasks) |
-| `/speckit-checklist` | Generate quality checklists ("unit tests for requirements") |
-| `/speckit-constitution` | Define or update project governance principles |
-| `/speckit-taskstoissues` | Sync tasks.md to GitHub Issues |
-| `/speckit-spex-help` | Quick reference for all commands |
+After applying additions, backtrace invokes follow-up reviews (review-spec, review-plan, analyze) automatically. See `.specify/extensions/backtrace/README.md` for details.
 
 ## Project Structure
 
 ```
 sdd-skills/
 ├── .specify/
-│   ├── extensions/          # 8 installed extensions
-│   │   ├── backtrace/       # Trace findings back to spec gaps
-│   │   ├── gap-audit/       # Adversarial gap auditor
-│   │   ├── git/             # Git workflow automation
-│   │   ├── spex/            # Core SDD workflow
-│   │   ├── spex-deep-review/# Multi-agent code review
-│   │   ├── spex-gates/      # Quality gates
-│   │   ├── spex-teams/      # Parallel agent teams
-│   │   └── spex-worktrees/  # Git worktree isolation
-│   ├── extensions.yml       # Extension registry and hook configuration
-│   ├── memory/
-│   │   └── constitution.md  # Synced from specs/constitution.md for agent context
-│   └── templates/           # Spec, plan, task templates
-├── .claude/
-│   └── skills/              # Claude Code skills (auto-generated, gitignored)
+│   ├── extensions/
+│   │   ├── backtrace/       # Backtrace extension
+│   │   └── gap-audit/       # Gap audit extension
+│   └── memory/
+│       └── constitution.md  # Synced from specs/constitution.md
 ├── specs/
-│   ├── constitution.md      # Project governance
+│   ├── constitution.md      # Project governance principles
 │   ├── gap-patterns.md      # Recurring gap audit patterns
-│   └── NNN-feature-name/    # Feature spec directories
-│       ├── spec.md
-│       ├── plan.md
-│       ├── tasks.md
-│       ├── research.md
-│       ├── data-model.md
-│       └── contracts/
+│   ├── 001-gap-audit-extension/
+│   └── 002-backtrace-extension/
 └── brainstorm/              # Brainstorm session documents
 ```
 
@@ -174,42 +81,18 @@ sdd-skills/
 
 The project follows 8 core principles defined in `specs/constitution.md`:
 
-1. **Correctness of Findings.** Precision over recall. Wrong findings corrupt decision-making.
-2. **Evidence-Based Claims.** Every finding cites specific evidence (file, line, quote).
-3. **Speckit-Native.** Follow speckit conventions. Don't invent custom patterns.
-4. **One Code Path Per Operation.** Call existing speckit commands. Don't reimplement.
+1. **Correctness of Findings.** Precision over recall.
+2. **Evidence-Based Claims.** Every finding cites specific evidence.
+3. **Speckit-Native.** Follow speckit conventions.
+4. **One Code Path Per Operation.** Call existing speckit commands.
 5. **Precise Skill Instructions.** Imperative directives with explicit output formats.
-6. **Architectural Decisions Require Explicit Approval.** Design choices with multiple valid approaches get approved first.
+6. **Architectural Decisions Require Explicit Approval.** Present options with trade-offs first.
 7. **Flag Uncertainty.** Distinguish certain from uncertain claims.
 8. **Conventional Commits.** All commits follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/).
 
 ## Contributing
 
-### Branching
-
-Feature branches use sequential numbering: `001-feature-name`, `002-another-feature`.
-
-```bash
-# Create a feature branch (handled by the git extension)
-/speckit-git-feature
-```
-
-### Commits
-
-All commits follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat(gap-audit): implement adversarial gap audit extension
-fix(spex-gates): correct review-code compliance scoring
-docs: update README with workflow overview
-```
-
-### Development Workflow
-
-1. Start with `/speckit-spex-brainstorm` to refine the idea
-2. The workflow guides you through specify, plan, tasks, implement
-3. Quality gates run automatically. Fix any blocking findings before proceeding.
-4. Commit with `git commit -s -S` (signed, GPG-signed)
+Feature branches use sequential numbering: `001-feature-name`, `002-another-feature`. Commits follow [Conventional Commits](https://www.conventionalcommits.org/), signed and GPG-signed.
 
 ## License
 
