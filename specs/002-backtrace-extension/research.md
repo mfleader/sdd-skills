@@ -41,19 +41,21 @@ description: "Human-readable description"
 ---
 ```
 
-**Standard sections** (applicable to backtrace):
-1. Ship Pipeline Guard (check `.specify/.spex-state` for autonomous mode)
-2. Overview
-3. Prerequisites (speckit version check, file existence)
-4. Argument parsing (scope, spec directory)
+**Standard sections** (applicable to backtrace, revised during implementation):
+1. Prerequisites (speckit version check, project structure)
+2. Argument parsing (scope, spec directory)
+3. Spec directory resolution (path validation)
+4. Findings resolution (JSON loading, validation)
 5. Artifact loading
 6. Core execution (tracing, proposing additions)
 7. Subagent dispatch (auditor)
 8. Response parsing (JSON handling)
-9. Output formatting
-10. Hook checking (after_backtrace)
+9. Apply additions
+10. Reset trigger check
+11. Output formatting
+12. Follow-up invocations (review-spec, review-plan, analyze)
 
-**Rationale**: Matches gap-audit command file (10 sections) and review-spec command file.
+**Rationale**: Based on gap-audit's 10-section pattern. Expanded to 12 during implementation: Ship Pipeline Guard and Overview were removed (YAGNI), sections for findings resolution, apply additions, reset triggers, and follow-ups were added.
 
 ## R-003: Subagent Dispatch Pattern
 

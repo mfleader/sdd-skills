@@ -19,7 +19,7 @@ Package the backtrace skill as a standalone speckit extension following the gap-
 **Project Type**: Speckit extension (prompt-engineering artifact)
 **Performance Goals**: N/A (single-invocation command)
 **Constraints**: Must follow speckit extension conventions. Single subagent dispatch per invocation.
-**Scale/Scope**: 1 command file (~200-350 lines), 1 extension.yml, 1 skill wrapper, 1 README, project README update
+**Scale/Scope**: 1 command file (~400 lines, 12 sections), 1 extension.yml, 1 skill wrapper (gitignored, auto-generated on install), 1 README, project README update
 
 ## Constitution Check
 
@@ -66,7 +66,7 @@ specs/002-backtrace-extension/
 │   └── speckit.backtrace.trace.md   # The command file (prompt-engineering artifact)
 └── README.md                        # Extension documentation
 
-.claude/skills/speckit-backtrace-trace/
+.claude/skills/speckit-backtrace-trace/   # gitignored, auto-generated on install
 └── SKILL.md                         # Claude Code skill wrapper
 ```
 

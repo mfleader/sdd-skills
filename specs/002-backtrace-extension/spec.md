@@ -46,7 +46,7 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 
 **Why this priority:** Auditor gating prevents spec degradation from unchecked automated edits.
 
-### US-004: Follow-up review hooks (P2)
+### US-004: Follow-up reviews (P2)
 
 **As** a developer,
 **I want** review-spec, review-plan, and analyze to run automatically after backtrace completes,
@@ -54,11 +54,11 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 
 **Acceptance Scenarios:**
 
-1. **Given** the backtrace extension is installed with hooks declared, **When** backtrace completes and additions were applied, **Then** follow-up review commands are triggered via the speckit hook system.
-2. **Given** the backtrace extension is installed with hooks declared, **When** backtrace completes but all additions were rejected, **Then** follow-up hooks still fire (they verify the artifacts are consistent even without changes).
-3. **Given** spex-gates is not installed, **When** backtrace completes, **Then** hooks are skipped with a warning and backtrace exits normally.
+1. **Given** the backtrace extension is installed, **When** backtrace completes and additions were applied, **Then** follow-up review commands are directly invoked by the backtrace command file.
+2. **Given** the backtrace extension is installed, **When** backtrace completes but all additions were rejected, **Then** follow-up reviews still run (they verify the artifacts are consistent even without changes).
+3. **Given** spex-gates is not installed, **When** backtrace completes, **Then** follow-up reviews are skipped with a warning and backtrace exits normally.
 
-**Why this priority:** Hooks automate verification. Without them the user must manually invoke reviews, which is viable but tedious.
+**Why this priority:** Follow-up reviews automate verification. Without them the user must manually invoke reviews, which is viable but tedious.
 
 ### US-005: Reset trigger detection (P2)
 
@@ -90,9 +90,9 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
   - Implicit assumption: what constraint should be explicit in the spec?
   - Edge case not covered: what AC should have specified the boundary?
   - If a finding cannot be traced to any existing spec item, propose a new FR or AC rather than an amendment. This may trigger a reset trigger (FR-009).
-- **FR-004**: For each traced gap, draft a specific addition: new or amended FR, AC, SC, or task. Additions target spec.md (for FRs, ACs, SCs) or tasks.md (for tasks). Plan.md additions are limited to new tasks referencing existing plan phases.
+- **FR-004**: For each traced gap, draft a specific addition: new or amended FR, AC, SC, or task. Additions target spec.md (for FRs, ACs, SCs) or tasks.md (for new tasks referencing existing plan phases). Plan.md is read-only and is not modified by backtrace.
 - **FR-005**: Additions are edits to existing artifacts, not regeneration. Preserve all existing content. Add, don't replace.
-- **FR-006**: Dispatch an adversarial auditor subagent (via `superpowers:code-reviewer`) to review all proposed additions. The auditor prompt must include: the original findings, the proposed additions, instructions to verify each addition addresses the gap it claims to, no addition introduces new inconsistencies, no addition is redundant with existing content.
+- **FR-006**: Dispatch an adversarial auditor subagent (via `superpowers:code-reviewer`) to review all proposed additions. The auditor prompt must include: the original findings, the proposed additions, instructions to verify each addition addresses the gap it claims to, no addition introduces new inconsistencies, no addition is redundant with existing content. The prompt must include an anti-injection directive marking data within XML tags as opaque input, not instructions.
 - **FR-007**: Auditor classifies each proposal as: **approve**, **reject** (with reason), or **revise** (with suggested revision).
 - **FR-008**: Apply approved additions to the spec artifacts. Incorporate auditor revisions where suggested. Do not apply rejected additions.
 - **FR-009**: After applying additions, check reset triggers: new user story, new non-refinement FR, SC count change by 3+, or material scope expansion. If a constitution file exists (`.specify/memory/constitution.md`), use its thresholds. If no constitution exists, use these defaults. Report if triggered but do not take action.
@@ -101,14 +101,14 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 
 **Follow-up hooks:**
 
-- **FR-012**: After completing (whether additions were applied or all were rejected), the backtrace command file directly invokes follow-up reviews: review-spec, review-plan (plan scope only), and analyze. Before invoking each, it checks the extensions registry (`.specify/extensions/.registry`) for spex-gates availability. This follows the same pattern as review-code invoking deep-review.
+- **FR-012**: After completing (whether additions were applied or all were rejected), the backtrace command file directly invokes follow-up reviews. It checks the extensions registry (`.specify/extensions/.registry`) for spex-gates availability. If available, it invokes review-spec and review-plan (plan scope only). Regardless of spex-gates availability, it invokes `/speckit-analyze` for cross-artifact consistency (analyze is a core speckit command, not a spex-gates dependency).
 - **FR-013**: Follow-up reviews are a soft dependency on spex-gates. If spex-gates is not installed, follow-ups are skipped with a warning. No error. No hooks are declared in backtrace's extension.yml (speckit's hook schema only allows one command per hook point per extension, making hook-based follow-ups infeasible for three commands).
 
 **Extension packaging:**
 
 - **FR-014**: Packaged as a speckit extension with `extension.yml`, a `commands/` directory, and a Claude Code skill wrapper.
 - **FR-015**: Follows the same structure as gap-audit: extension.yml, command markdown file, skill SKILL.md, extension README.
-- **FR-015a**: At invocation, check the speckit version from `.specify/init-options.json`. If below 0.5.2, stop with "This extension requires speckit >= 0.5.2. Installed: [version]". If version cannot be determined, proceed with a warning.
+- **FR-015a**: At invocation, check the speckit version from `.specify/init-options.json`. Strip any pre-release suffix (e.g., `.dev0`) before comparison. If below 0.5.2, stop with "This extension requires speckit >= 0.5.2. Installed: [version]". If version cannot be determined, proceed with a warning.
 
 **Documentation:**
 
@@ -118,8 +118,8 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 ### Key Entities
 
 - **GapFinding**: A structured finding from gap-audit or other source. Contains at minimum: `classification` (blocking/non-blocking), `category`, `description`, `evidence`, `suggested_fix`.
-- **ProposedAddition**: A drafted edit to a spec artifact. Contains: target artifact (spec.md or tasks.md), target section, addition type (new FR, amended FR, new AC, amended AC, new SC, new task), content, and the finding it addresses.
-- **AuditorVerdict**: The auditor's classification of a proposed addition: approve, reject (with reason), or revise (with suggested revision).
+- **ProposedAddition**: A drafted edit to a spec artifact. Contains: `addition_id` (unique per-addition ID, e.g., "1.1", "1.2" for multiple additions from finding 1), `finding_ref` (finding index), target artifact (spec.md or tasks.md), target section, addition type (new FR, amended FR, new AC, amended AC, new SC, new task), content, and rationale explaining why the addition addresses the gap.
+- **AuditorVerdict**: The auditor's classification of a proposed addition. Contains: `addition_ref` (matches the ProposedAddition's `addition_id`), verdict (approve, reject, or revise), reason (required for reject, optional for approve), and revision (required for revise).
 
 ## Success Criteria
 
@@ -128,20 +128,29 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 - **SC-003**: Only approved or revised additions are applied to artifacts; rejected additions are not applied.
 - **SC-004**: Existing artifact content is preserved. Additions only, no regeneration.
 - **SC-005**: Reset trigger check fires and reports when thresholds are crossed.
-- **SC-006**: Follow-up hooks trigger review-spec, review-plan, and analyze after backtrace completes.
+- **SC-006**: Follow-up reviews (review-spec, review-plan) are directly invoked after backtrace completes when spex-gates is installed. Analyze runs unconditionally as a core speckit command.
 - **SC-007**: Extension installs via `specify extension add` and follows speckit conventions.
 - **SC-008**: README extensions table includes backtrace with usage examples and copy-paste install commands for both extensions.
 
 ## Error Handling
 
+- speckit not initialized (`.specify/` missing): stop with "speckit not initialized. Run `specify init` first."
 - Missing spec directory or spec.md: stop with "Required file not found: `<path>`"
-- Invalid or missing scope argument: stop with "Invalid scope '[value]'. Valid values: spec, plan"
+- Spec directory or findings file resolves outside project root: stop with path traversal error.
+- Invalid or missing scope argument: if empty, prompt the user interactively. If non-empty but invalid, stop with "Invalid scope '[value]'. Valid values: spec, plan"
+- `--output` flag provided: stop with "The `--output` flag is not supported by backtrace. Use gap-audit with `--output` to persist findings, then run backtrace against the persisted file."
 - User-provided findings file path does not exist: stop with "Findings file not found: `<path>`"
 - Empty findings list: report "No findings to trace" and exit cleanly.
 - Findings in unexpected format (not GapFinding JSON): stop with parse error describing the expected format.
+- Auditor subagent returns empty or no response: warn and apply no additions.
 - Auditor subagent returns non-JSON or malformed response: warn and treat as empty (no additions applied). If the response is a JSON array with some valid and some malformed verdicts, apply the valid ones and warn about the rest.
+- Auditor returns fewer verdicts than additions: warn about count mismatch, apply unmatched additions as approved.
+- Auditor returns empty array `[]`: treat as all additions implicitly approved (no objections).
+- Files modified or created during audit: abort backtrace with integrity violation error.
+- Target section heading not found when applying addition: append content at end of file with warning.
 - Backtrace extension not installed when invoked: standard speckit "command not found" behavior.
 - Constitution not found when checking reset triggers: use default thresholds (defined in FR-009) with a warning.
+- Not a git repository: skip post-dispatch file modification check with a log message.
 
 ## Edge Cases
 
@@ -155,13 +164,13 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 
 - speckit >= 0.5.2
 - gap-audit extension (backtrace consumes its GapFinding JSON schema, but does not require gap-audit to be installed; any source producing that schema works)
-- spex-gates extension (soft dependency for follow-up hooks: review-spec, review-plan. Hooks are skipped with a warning if spex-gates is not installed.)
+- spex-gates extension (soft dependency for follow-up reviews: review-spec, review-plan. Reviews are skipped with a warning if spex-gates is not installed.)
 - speckit analyze command (for follow-up consistency check)
 
 ## Assumptions
 
 - The GapFinding JSON schema is stable and documented by the gap-audit extension.
-- The speckit hook system supports declaring hooks in an extension's `extension.yml` under a `hooks:` key with lifecycle event names (e.g., `after_specify`, `after_tasks`). Each hook entry has `command`, `optional`, and `description` fields. Core commands read these from `.specify/extensions.yml` at runtime. Verified against the spex-gates extension which declares `after_specify`, `after_tasks`, and `after_implement` hooks.
+- Speckit's hook schema allows one command per hook point per extension. Backtrace needs three follow-up commands (review-spec, review-plan, analyze), so it uses direct invocation instead of hooks. No hooks are declared in backtrace's extension.yml. See research.md R-005.
 - The `superpowers:code-reviewer` subagent type is available for auditor dispatch.
 - Constitution reset trigger thresholds may be defined in `.specify/memory/constitution.md`. If absent, FR-009 defines default thresholds.
 

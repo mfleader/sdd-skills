@@ -27,7 +27,12 @@ Within the resolved spec directory, findings are loaded from:
 
 | Condition | Message |
 |-----------|---------|
-| Missing/invalid scope | `Invalid scope '[value]'. Valid values: spec, plan` |
+| speckit not initialized | `speckit not initialized. Run specify init first.` |
+| speckit version < 0.5.2 | `This extension requires speckit >= 0.5.2. Installed: [version]` |
+| `--output` flag provided | `The --output flag is not supported by backtrace. Use gap-audit with --output to persist findings, then run backtrace against the persisted file.` |
+| Missing scope | Interactive prompt: `Scope required. Valid values: spec, plan` |
+| Invalid scope | `Invalid scope '[value]'. Valid values: spec, plan` |
+| Spec directory outside project root | `Spec directory path resolves outside the project root: <resolved_path>` |
 | Spec directory not found | `Required file not found: <path>` |
 | spec.md missing | `Required file not found: <spec_dir>/spec.md` |
 | plan.md missing (plan scope) | `Required file not found: <spec_dir>/plan.md` |
@@ -35,7 +40,7 @@ Within the resolved spec directory, findings are loaded from:
 | Findings file not found | `Findings file not found: <path>` |
 | Empty findings | `No findings to trace` (clean exit) |
 | Invalid findings format | Parse error with expected format description |
-| speckit version < 0.5.2 | `This extension requires speckit >= 0.5.2. Installed: [version]` |
+| Audit integrity violation | `Audit integrity violation: files were modified or created during review-only audit. Aborting backtrace.` |
 
 ## Output
 
@@ -108,19 +113,19 @@ Consider running /speckit-plan to re-plan.
 ```json
 [
   {
-    "addition_ref": "1",
+    "addition_ref": "1.1",
     "verdict": "approve",
     "reason": null,
     "revision": null
   },
   {
-    "addition_ref": "2",
+    "addition_ref": "1.2",
     "verdict": "revise",
     "reason": "Overlaps with existing FR-005",
     "revision": "Amend FR-005 instead of creating new FR"
   },
   {
-    "addition_ref": "3",
+    "addition_ref": "2.1",
     "verdict": "reject",
     "reason": "This AC is already covered by US-002 scenario 1"
   }

@@ -21,11 +21,11 @@
 
 ## Phase 2: Foundational (Command File Skeleton)
 
-**Purpose**: Create the command file with all 10 sections as stubs, then fill in the non-story-specific sections
+**Purpose**: Create the command file with all sections as stubs, then fill in the non-story-specific sections
 
-- [X] T004 Create command file skeleton at `.specify/extensions/backtrace/commands/speckit.backtrace.trace.md` with YAML front matter (`description: "Trace gap-audit findings back to missing spec items and propose additions"`) and 10 section headings matching research.md R-002
-- [X] T005 Fill Section 1 (Ship Pipeline Guard): check `.specify/.spex-state` for autonomous mode per the pattern in speckit-spex-gates-review-spec (read status and ask fields, set AUTONOMOUS_MODE)
-- [X] T006 Fill Section 2 (Overview): brief description of backtrace purpose and usage
+- [X] T004 Create command file skeleton at `.specify/extensions/backtrace/commands/speckit.backtrace.trace.md` with YAML front matter (`description: "Trace gap-audit findings back to missing spec items and propose additions"`) and 12 section headings
+- [X] T005 ~~Fill Section 1 (Ship Pipeline Guard)~~ Removed during deep review (YAGNI, not in spec). Section 1 is now Prerequisites.
+- [X] T006 ~~Fill Section 2 (Overview)~~ Removed during deep review (redundant with SKILL.md). Consolidated into command file preamble.
 - [X] T007 Fill Section 3 (Prerequisites): speckit version check from `.specify/init-options.json` per FR-015a; validate `.specify/` directory exists
 - [X] T008 Fill Section 4 (Argument Parsing): parse `$ARGUMENTS` for scope (`spec`/`plan`), optional spec directory path, and `--output` flag handling (error: not supported). Validate scope per FR-002. Error messages per contracts/command-schema.md
 - [X] T009 Fill Section 5 (Spec Directory Resolution): three-step resolution per FR-002a and research.md R-004 (argument, feature.json, ask user). Validate spec.md exists. For plan scope, validate plan.md and tasks.md exist
@@ -95,7 +95,7 @@
 
 - [X] T022 [US4] Fill Section 10 (Follow-Up Invocations): after output formatting, check extensions registry (`.specify/extensions/.registry`) for spex-gates availability per FR-012. If available, invoke review-spec. For plan scope, also invoke review-plan. Invoke analyze if available
 - [X] T023 [US4] Add soft dependency handling: if spex-gates is not installed, log warning "spex-gates not installed, skipping follow-up reviews" and continue. No error per FR-013
-- [X] T024 [US4] Handle autonomous mode in follow-up invocations: if AUTONOMOUS_MODE is true from Section 1, suppress user prompts during follow-up invocations
+- [X] T024 ~~[US4] Handle autonomous mode in follow-up invocations~~ Removed during deep review (AUTONOMOUS_MODE descoped)
 
 **Checkpoint**: Follow-up reviews fire after backtrace. Graceful degradation when spex-gates absent.
 
@@ -180,5 +180,5 @@
 
 - This is a prompt-engineering project. "Implementation" means writing markdown command sections, not compiled code.
 - Each task fills one or more sections of the command file at `.specify/extensions/backtrace/commands/speckit.backtrace.trace.md`
-- The command file follows the 10-section structure from research.md R-002
+- The command file follows a 12-section structure (expanded from the 10-section pattern in research.md R-002)
 - Test fixtures from gap-audit (`specs/001-gap-audit-extension/test-fixtures/`) can be adapted for backtrace testing
