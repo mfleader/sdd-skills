@@ -40,10 +40,10 @@ brainstorm ─> specify ─> clarify ─> plan ─> tasks ─> implement ─> re
 | Plan | `/speckit-plan` | Design the technical approach | `plan.md`, `research.md`, `data-model.md`, `contracts/` |
 | Tasks | `/speckit-tasks` | Break the plan into actionable tasks | `tasks.md` |
 | Implement | `/speckit-implement` | Execute tasks phase by phase | Source code |
-| Review | `/speckit-spex-gates-review-code` | Check code against spec compliance | `REVIEW-CODE.md` |
-| Verify | `/speckit-spex-gates-verify` | Final verification gate | Verification report |
+| Review | *(automatic)* | Spec compliance check after implement | `REVIEW-CODE.md` |
+| Verify | *(automatic)* | Final verification gate | Verification report |
 
-Quality gates run automatically between stages (spec review after specify, plan review after tasks, code review after implement). You don't need to invoke them manually unless you want to re-run one.
+Quality gates (review-spec, review-plan, review-code, verify) run automatically via hooks between stages. You don't need to invoke them manually unless you want to re-run one.
 
 ### Autonomous Mode
 
