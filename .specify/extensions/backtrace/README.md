@@ -82,13 +82,13 @@ If applied additions cross reset trigger thresholds (new user story, new non-ref
 
 ## Follow-Up Reviews
 
-After completing, backtrace checks if `spex-gates` is installed and invokes:
+After completing, backtrace invokes follow-up reviews:
 
-1. `review-spec` (both scopes)
-2. `review-plan` (plan scope only)
-3. `analyze` (cross-artifact consistency)
+1. `review-spec` (both scopes, requires spex-gates)
+2. `review-plan` (plan scope only, requires spex-gates)
+3. `analyze` (cross-artifact consistency, core speckit command, always runs)
 
-If `spex-gates` is not installed, follow-ups are skipped with a note. No error.
+If `spex-gates` is not installed, review-spec and review-plan are skipped with a note. Analyze runs regardless.
 
 ## Artifact Interactions
 
@@ -109,4 +109,7 @@ If `spex-gates` is not installed, follow-ups are skipped with a note. No error.
 - Single subagent dispatch per invocation. No multi-round iteration.
 - Plan.md is read-only. The backtrace never modifies plan.md.
 - This extension does not depend on gap-audit being installed. Any source producing GapFinding JSON works.
-- Soft dependency on spex-gates for follow-up reviews. Graceful degradation when absent.
+- Soft dependency on spex-gates for follow-up reviews (review-spec, review-plan). Graceful degradation when absent. Analyze runs unconditionally.
+- Spec directory and findings file paths are validated to be within the project root (path traversal protection).
+- The auditor prompt includes an anti-injection directive marking data within XML tags as opaque input.
+- Post-dispatch integrity check verifies no files were modified or created during the audit.

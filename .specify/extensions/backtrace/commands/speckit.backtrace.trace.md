@@ -387,20 +387,34 @@ fi
 
 ### If spex-gates is available and enabled
 
-Invoke follow-up reviews sequentially:
+**Automatic**: review-spec
+Executing: `/speckit-spex-gates-review-spec`
+EXECUTE_COMMAND: speckit-spex-gates-review-spec
 
-1. **review-spec**: Invoke `/speckit-spex-gates-review-spec` to verify the spec is still sound after additions. Pass the spec directory path if it was resolved from arguments.
+Wait for the result before proceeding. Pass the spec directory path if it was resolved from arguments.
 
-2. **review-plan** (plan scope only): Invoke `/speckit-spex-gates-review-plan` to verify the plan is consistent with the updated spec.
+**If scope is `plan`:**
 
-3. **analyze**: Invoke `/speckit-analyze` for cross-artifact consistency check. This is a core speckit command; no registry check is needed.
+**Automatic**: review-plan
+Executing: `/speckit-spex-gates-review-plan`
+EXECUTE_COMMAND: speckit-spex-gates-review-plan
+
+Wait for the result before proceeding.
 
 ### If spex-gates is not available
 
 Log a warning and continue:
 
 ```
-Note: spex-gates extension not installed. Skipping follow-up reviews (review-spec, review-plan, analyze). Install spex-gates for automatic post-backtrace verification.
+Note: spex-gates extension not installed. Skipping follow-up reviews (review-spec, review-plan). Install spex-gates for automatic post-backtrace verification.
 ```
 
-Do not stop or error. Backtrace completes normally without follow-up reviews.
+### Cross-artifact consistency check
+
+This runs regardless of whether spex-gates is installed.
+
+**Automatic**: analyze
+Executing: `/speckit-analyze`
+EXECUTE_COMMAND: speckit-analyze
+
+Wait for the result before completing.
