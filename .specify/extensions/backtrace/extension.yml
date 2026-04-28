@@ -1,0 +1,23 @@
+schema_version: "1.0"
+
+extension:
+  id: backtrace
+  name: "SDD Backtrace"
+  version: "0.1.0"
+  description: "Trace gap-audit findings back to missing spec items and propose additions"
+  author: cc-spex
+  license: MIT
+
+requires:
+  speckit_version: ">=0.5.2"
+
+provides:
+  commands:
+    - name: speckit.backtrace.trace
+      file: commands/speckit.backtrace.trace.md
+      description: "Trace findings back to spec gaps and propose additions"
+
+tags:
+  - "sdd"
+  - "backtrace"
+  - "quality"
