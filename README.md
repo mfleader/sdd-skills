@@ -64,7 +64,7 @@ Quality gates run automatically between stages (spec review after specify, plan 
 
 ## Extensions
 
-The project ships 7 extensions. All are active by default.
+The project ships 8 extensions. All are active by default.
 
 | Extension | Description | Key Commands |
 |-----------|-------------|-------------|
@@ -75,6 +75,7 @@ The project ships 7 extensions. All are active by default.
 | **spex-worktrees** | Git worktree isolation for feature work | `manage` |
 | **git** | Branch creation, auto-commits, validation | `initialize`, `feature`, `commit`, `validate`, `remote` |
 | **gap-audit** | Adversarial gap auditor for specs and plans | `audit` |
+| **backtrace** | Trace gap-audit findings back to spec gaps and propose additions | `trace` |
 
 ### Managing Extensions
 
@@ -88,6 +89,7 @@ specify extension enable spex-deep-review
 
 # Install from git
 specify extension add gap-audit --from <git-url>
+specify extension add backtrace --from <git-url>
 ```
 
 ## Gap Audit
@@ -107,6 +109,24 @@ The gap audit extension dispatches an adversarial subagent to find gaps the stan
 
 The auditor applies 8 false positive filters before reporting and groups findings as blocking or non-blocking. See `.specify/extensions/gap-audit/README.md` for details.
 
+## Backtrace
+
+The backtrace extension closes the loop between finding gaps and fixing them. It traces gap-audit findings back to the spec artifacts that should have caught them, proposes additions, gets adversarial auditor approval, and applies approved changes.
+
+```bash
+# First, run gap-audit with --output to persist findings
+/speckit-gap-audit-audit spec --output
+
+# Then run backtrace to trace and fix the gaps
+/speckit-backtrace-trace spec
+
+# For plan-scope (traces against spec + plan + tasks)
+/speckit-gap-audit-audit plan --output
+/speckit-backtrace-trace plan
+```
+
+After applying additions, backtrace automatically invokes follow-up reviews (review-spec, review-plan, analyze) if spex-gates is installed. See `.specify/extensions/backtrace/README.md` for details.
+
 ## Utility Commands
 
 | Command | What it does |
@@ -122,7 +142,8 @@ The auditor applies 8 false positive filters before reporting and groups finding
 ```
 sdd-skills/
 ├── .specify/
-│   ├── extensions/          # 7 installed extensions
+│   ├── extensions/          # 8 installed extensions
+│   │   ├── backtrace/       # Trace findings back to spec gaps
 │   │   ├── gap-audit/       # Adversarial gap auditor
 │   │   ├── git/             # Git workflow automation
 │   │   ├── spex/            # Core SDD workflow
