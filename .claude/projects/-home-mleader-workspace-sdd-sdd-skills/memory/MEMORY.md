@@ -1,0 +1,7 @@
+- [Extension packaging decisions](project_extension-decisions.md) — single speckit extension for gap-audit + review-loop, name TBD
+- [User role and context](user_role.md) — building SDD tooling with spex coworker, packaging skills for distribution
+- [Don't push naming decisions](feedback_naming.md) — use placeholders, don't interrogate on names
+- [Constitution persistence](feedback_constitution-persistence.md) — always write constitution changes to the persisted file
+- [Verify conventions before asserting](feedback_verify-conventions.md) — check real projects before confidently asserting tool defaults are correct
+- [Example gap-patterns.md](project_gap-patterns-example.md) — create example file during plan/tasks for gap audit extension
+- [Brainstorm dir purpose](feedback_brainstorm-dir.md) — session checkpoint for brainstorming skill, not project docs
