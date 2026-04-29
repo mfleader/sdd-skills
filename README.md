@@ -18,8 +18,8 @@ flowchart TD
     C -->|"findings JSON"| D["backtrace<br>trace gaps to spec, propose fixes"]
     D -->|"updated artifacts"| B
 
-    style C fill:#fff,stroke:#d44,stroke-width:2px
-    style D fill:#fff,stroke:#26a,stroke-width:2px
+    style C fill:#fdd,stroke:#b00,stroke-width:2px,color:#000
+    style D fill:#ddf,stroke:#006,stroke-width:2px,color:#000
 ```
 
 1. Write your spec, plan, and tasks. Review gates run automatically.
