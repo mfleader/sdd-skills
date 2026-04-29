@@ -7,6 +7,32 @@ Custom extensions for [speckit](https://github.com/github/spec-kit), a CLI frame
 - [speckit](https://github.com/github/spec-kit) (>= 0.5.2) initialized with [spex](https://github.com/github/spec-kit#spex) extensions (spex, spex-gates, git)
 - [Claude Code](https://claude.ai/claude-code) CLI
 
+## Where These Extensions Fit
+
+```mermaid
+flowchart TD
+    Specify["/speckit-specify"] --> ReviewSpec["review-spec<br>(auto)"]
+    ReviewSpec --> GapSpec["/speckit-gap-audit-audit spec<br>Find spec gaps"]
+    GapSpec -->|"findings JSON"| BacktraceSpec["/speckit-backtrace-trace spec<br>Trace & fix gaps"]
+    BacktraceSpec -->|"updated spec"| ReviewSpec
+
+    ReviewSpec -->|"spec clean"| Plan["/speckit-plan + /speckit-tasks"]
+    Plan --> ReviewPlan["review-plan<br>(auto)"]
+    ReviewPlan --> GapPlan["/speckit-gap-audit-audit plan<br>Find plan gaps"]
+    GapPlan -->|"findings JSON"| BacktracePlan["/speckit-backtrace-trace plan<br>Trace & fix gaps"]
+    BacktracePlan -->|"updated spec + tasks"| ReviewPlan
+
+    ReviewPlan -->|"plan clean"| Implement["/speckit-implement"]
+    Implement --> ReviewCode["review-code<br>(auto)"]
+
+    style GapSpec fill:#f96,stroke:#333
+    style GapPlan fill:#f96,stroke:#333
+    style BacktraceSpec fill:#69f,stroke:#333
+    style BacktracePlan fill:#69f,stroke:#333
+```
+
+**Gap audit** (orange) finds gaps after review gates pass. **Backtrace** (blue) traces those gaps back to the spec, proposes additions, and feeds the updated artifacts back through review. Both are optional, manual invocations that complement the automatic review gates.
+
 ## Extensions
 
 This repo provides two extensions:
