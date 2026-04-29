@@ -9,29 +9,19 @@ Custom extensions for [speckit](https://github.com/github/spec-kit), a CLI frame
 
 ## Where These Extensions Fit
 
+These extensions plug into the [spex workflow](https://github.com/rhuss/cc-spex#the-workflow) as optional quality loops after the automatic review gates:
+
 ```mermaid
-flowchart TD
-    Specify["/speckit-specify"] --> ReviewSpec["review-spec<br>(auto)"]
-    ReviewSpec --> GapSpec["/speckit-gap-audit-audit spec<br>Find spec gaps"]
-    GapSpec -->|"findings JSON"| BacktraceSpec["/speckit-backtrace-trace spec<br>Trace & fix gaps"]
-    BacktraceSpec -->|"updated spec"| ReviewSpec
+flowchart LR
+    Review["review gate passes"] --> Gap["gap-audit<br>find gaps"]
+    Gap -->|"findings JSON"| BT["backtrace<br>trace & fix"]
+    BT -->|"updated artifacts"| Review
 
-    ReviewSpec -->|"spec clean"| Plan["/speckit-plan + /speckit-tasks"]
-    Plan --> ReviewPlan["review-plan<br>(auto)"]
-    ReviewPlan --> GapPlan["/speckit-gap-audit-audit plan<br>Find plan gaps"]
-    GapPlan -->|"findings JSON"| BacktracePlan["/speckit-backtrace-trace plan<br>Trace & fix gaps"]
-    BacktracePlan -->|"updated spec + tasks"| ReviewPlan
-
-    ReviewPlan -->|"plan clean"| Implement["/speckit-implement"]
-    Implement --> ReviewCode["review-code<br>(auto)"]
-
-    style GapSpec fill:#f96,stroke:#333
-    style GapPlan fill:#f96,stroke:#333
-    style BacktraceSpec fill:#69f,stroke:#333
-    style BacktracePlan fill:#69f,stroke:#333
+    style Gap fill:#f96,stroke:#333
+    style BT fill:#69f,stroke:#333
 ```
 
-**Gap audit** (orange) finds gaps after review gates pass. **Backtrace** (blue) traces those gaps back to the spec, proposes additions, and feeds the updated artifacts back through review. Both are optional, manual invocations that complement the automatic review gates.
+Run **gap-audit** after review-spec or review-plan to find gaps the standard review missed. Run **backtrace** to trace those findings back to the spec and apply approved fixes. The cycle repeats until the review gate passes clean.
 
 ## Extensions
 
