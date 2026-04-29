@@ -9,19 +9,23 @@ Custom extensions for [speckit](https://github.com/github/spec-kit), a CLI frame
 
 ## Where These Extensions Fit
 
-These extensions plug into the [spex workflow](https://github.com/rhuss/cc-spex#the-workflow) as optional quality loops after the automatic review gates:
+These extensions plug into the [spex workflow](https://github.com/rhuss/cc-spex#the-workflow) as quality loops after the automatic review gates.
 
 ```mermaid
-flowchart LR
-    Review["review gate passes"] --> Gap["gap-audit<br>find gaps"]
-    Gap -->|"findings JSON"| BT["backtrace<br>trace & fix"]
-    BT -->|"updated artifacts"| Review
+flowchart TD
+    A["spec, plan, tasks"] --> B["review gate<br>(review-spec, review-plan, analyze)"]
+    B --> C["gap-audit<br>find what reviews missed"]
+    C -->|"findings JSON"| D["backtrace<br>trace gaps to spec, propose fixes"]
+    D -->|"updated artifacts"| B
 
-    style Gap fill:#f96,stroke:#333
-    style BT fill:#69f,stroke:#333
+    style C fill:#fff,stroke:#d44,stroke-width:2px
+    style D fill:#fff,stroke:#26a,stroke-width:2px
 ```
 
-Run **gap-audit** after review-spec or review-plan to find gaps the standard review missed. Run **backtrace** to trace those findings back to the spec and apply approved fixes. The cycle repeats until the review gate passes clean.
+1. Write your spec, plan, and tasks. Review gates run automatically.
+2. Run **gap-audit** to find gaps the standard reviews missed (orphan FRs, weak ACs, implicit assumptions, missing edge cases).
+3. Run **backtrace** to trace each gap back to the spec item that should have caught it, propose additions with adversarial auditor approval, and apply approved changes.
+4. Review gates re-run on the updated artifacts. Repeat until clean.
 
 ## Extensions
 
