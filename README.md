@@ -4,7 +4,7 @@ Custom extensions for [speckit](https://github.com/github/spec-kit), a CLI frame
 
 ## Prerequisites
 
-- [speckit](https://github.com/github/spec-kit) (>= 0.5.2) with spex extensions installed
+- [speckit](https://github.com/github/spec-kit) (>= 0.5.2) initialized with [spex](https://github.com/github/spec-kit#spex) extensions (spex, spex-gates, git)
 - [Claude Code](https://claude.ai/claude-code) CLI
 
 ## Extensions
