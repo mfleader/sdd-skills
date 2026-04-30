@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ExploratoryFindings",
+  "description": "Output of speckit.exploratory-test.test --output. Written to <spec_dir>/.exploratory-findings.json",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["severity", "description", "reproduction", "expected", "actual", "spec_gap", "source"],
+    "properties": {
+      "severity": {
+        "type": "string",
+        "enum": ["critical", "important", "moderate", "minor"],
+        "description": "critical=crash/data loss, important=wrong result, moderate=unexpected but non-breaking, minor=cosmetic/style"
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "description": "What happened"
+      },
+      "reproduction": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Command or code snippet to reproduce"
+      },
+      "expected": {
+        "type": "string",
+        "minLength": 1,
+        "description": "What should have happened"
+      },
+      "actual": {
+        "type": "string",
+        "minLength": 1,
+        "description": "What did happen"
+      },
+      "spec_gap": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Which FR/AC/SC should have caught this"
+      },
+      "source": {
+        "type": "string",
+        "const": "exploratory",
+        "description": "Injected by the extension (FR-010). Always 'exploratory'."
+      },
+      "pattern_match": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Canonical name from defect catalog. Present only when finding matches a known pattern."
+      }
+    },
+    "additionalProperties": false
+  }
+}

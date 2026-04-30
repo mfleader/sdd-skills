@@ -1,0 +1,47 @@
+[
+  {
+    "severity": "moderate",
+    "description": "Integrity check warning for created files suggests 'git diff', which doesn't show untracked files. Should suggest 'git status' or 'git ls-files --others --exclude-standard'.",
+    "reproduction": "mkdir -p /tmp/probe && cd /tmp/probe && git init -q && echo test > a.txt && git add a.txt && git commit -q -m init && echo new > untracked.txt && git diff --name-only && git diff --name-only HEAD",
+    "expected": "The created-files warning should suggest a command that actually shows untracked files, such as 'git status' or 'git ls-files --others --exclude-standard'.",
+    "actual": "Both git diff --name-only and git diff --name-only HEAD produce empty output for untracked files. The warning directs the user to a command that cannot reveal the problem it describes.",
+    "spec_gap": "FR-012 specifies the warning message with 'Review changes with git diff' for created files, but git diff is the wrong tool for untracked files. The spec should distinguish the suggested command between modified files (git diff) and created files (git status).",
+    "source": "exploratory"
+  },
+  {
+    "severity": "moderate",
+    "description": "Spec FR-012 says 'git diff --name-only' (bare, no revision) but command Section 9 uses 'git diff --name-only HEAD'. Spec is stale after deep review correction.",
+    "reproduction": "Compare spec FR-012 text with command Section 9 bash template.",
+    "expected": "Spec FR-012 should be updated to say 'git diff --name-only HEAD' to match the implementation.",
+    "actual": "Spec says 'git diff --name-only'. Command says 'git diff --name-only HEAD'. Spec is stale.",
+    "spec_gap": "FR-012 text does not reflect the deep review correction. Spec artifacts should be updated when implementation deviates for correctness reasons.",
+    "source": "exploratory"
+  },
+  {
+    "severity": "moderate",
+    "description": "Spec FR-013 PARSE_FAILED message is stale. Spec says 'Re-run the test or review the subagent output manually.' Command says 'Re-run the test.'",
+    "reproduction": "Compare spec FR-013 PARSE_FAILED message with command Section 12 PARSE_FAILED message.",
+    "expected": "Spec FR-013 should be updated to match the implementation's shortened message.",
+    "actual": "Spec says 'Re-run the test or review the subagent output manually.' Command says 'Re-run the test.' The trailing clause was removed per deep review but spec is stale.",
+    "spec_gap": "FR-013 message text does not reflect the deep review correction.",
+    "source": "exploratory"
+  },
+  {
+    "severity": "moderate",
+    "description": "Main project README.md does not mention the exploratory-test extension. Still says 'two extensions' and omits it from the Extensions table and project structure.",
+    "reproduction": "Read README.md at the repository root. Search for 'exploratory-test'. Not found.",
+    "expected": "Main README should list three extensions with exploratory-test added.",
+    "actual": "Main README says 'two extensions' and does not mention exploratory-test.",
+    "spec_gap": "No FR, AC, or task covers updating the main project README. Tasks.md T014 covers only the extension's own README.",
+    "source": "exploratory"
+  },
+  {
+    "severity": "minor",
+    "description": "Section 1 jq/git dependency checks are behavioral additions not covered by any FR. Tension with SC-004.",
+    "reproduction": "Search spec.md for 'which jq' or jq dependency checking. No FR mandates it.",
+    "expected": "If the command performs dependency checks, the spec should document this as an FR.",
+    "actual": "Spec has no FR for dependency checking. Command adds jq/git checks as undocumented behavior.",
+    "spec_gap": "SC-004 says no behavioral additions beyond speckit boilerplate. Dependency checks are additions. Either add an FR or acknowledge as boilerplate improvement.",
+    "source": "exploratory"
+  }
+]

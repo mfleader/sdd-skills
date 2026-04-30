@@ -1,0 +1,112 @@
+[
+  {
+    "classification": "blocking",
+    "category": "Weak ACs",
+    "description": "US5 AC3 does not specify which tracked files to compare against. FR-012 says 'git diff --name-only' without a revision argument. A bare 'git diff --name-only' compares working tree to index, not to pre-dispatch state. If the subagent stages modifications, the check would miss them.",
+    "evidence": "FR-012: 'run git diff --name-only and git ls-files --others --exclude-standard'. No revision argument specified. US5 AC3 can pass even if staged modifications are missed.",
+    "suggested_fix": "Specify in FR-012 that the integrity check uses 'git diff --name-only HEAD' to detect both staged and unstaged modifications.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "blocking",
+    "category": "Implicit behavior",
+    "description": "FR-011 says 'Validate output JSON after writing' but does not specify what happens when validation fails. A corrupt JSON file consumed by downstream tools would violate Constitution Principle I.",
+    "evidence": "FR-011: 'Validate output JSON after writing.' No AC or FR specifies the failure path.",
+    "suggested_fix": "Add condition-false path to FR-011: 'If JSON validation fails, warn the user. Do not delete the file.'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "blocking",
+    "category": "Orphan FRs",
+    "description": "No FR explicitly states the subagent must RUN the tests it writes. FR-007 says 'instruction to write tests' and 'instruction to run the project test suite' but never says 'instruction to run the written exploratory tests.' Parity checklist #10 maps to FR-007 but FR-007 lacks this instruction.",
+    "evidence": "FR-007 lists 'instruction to write tests to /tmp/exploratory-tests/' and 'instruction to run the project test suite for regression' as separate items. No item says 'run the written tests.'",
+    "suggested_fix": "Add to FR-007: 'instruction to run the written exploratory tests against the implementation'.",
+    "source": "audit",
+    "scope": "spec",
+    "pattern_match": "missing-derived-fr"
+  },
+  {
+    "classification": "blocking",
+    "category": "Weak ACs",
+    "description": "FR-009 lists four parsing cases but does not list empty/whitespace-only response as a distinct case. An empty response would fall through to 'non-JSON prose' implicitly.",
+    "evidence": "FR-009 lists: valid JSON array, empty array, non-JSON prose, malformed JSON. No 'empty or whitespace-only response' case. Backtrace command explicitly handles this case.",
+    "suggested_fix": "Add fifth case to FR-009: 'Empty or whitespace-only response: set PARSE_FAILED, treat as empty array.'",
+    "source": "audit",
+    "scope": "spec",
+    "pattern_match": "missing-condition-false-path"
+  },
+  {
+    "classification": "blocking",
+    "category": "Implicit behavior",
+    "description": "FR-009 validates only the first element of a JSON array. If later findings have missing fields, the behavior is undefined. Should the extension reject the array, drop invalid findings, or pass all through?",
+    "evidence": "FR-009: 'validate first element has required ExploratoryFinding fields'. The contract marks all fields required with additionalProperties: false. But only first element is validated.",
+    "suggested_fix": "State that first-element validation is a structural sanity check and downstream consumers should validate individual findings.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Cross-reference gaps",
+    "description": "FR-012 (integrity check) has no parity checklist item. The integrity check is speckit boilerplate covered by SC-002 but not SC-001's 33-item checklist.",
+    "evidence": "Behavioral parity checklist: 33 items, none references post-dispatch integrity check. SC-002 lists 'post-dispatch integrity check' but SC-001 does not.",
+    "suggested_fix": "Add parity checklist item #34 for post-dispatch integrity check, or note that SC-002 covers boilerplate behaviors separately.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit assumptions",
+    "description": "No guidance for how the subagent discovers the project test suite. 'Discoverable' is undefined.",
+    "evidence": "Assumptions: 'The project has a discoverable test suite... does not prescribe a specific test runner.' FR-007: 'instruction to run the project test suite'. No definition of 'discoverable'.",
+    "suggested_fix": "Add to assumptions: 'Test suite discovery is delegated to the subagent using standard project conventions (Makefile, package.json, setup.py, go.mod, etc.).'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Naming collisions",
+    "description": "Gap-audit uses project-level 'gap-patterns.md' while exploratory test uses per-spec-directory 'defect-catalog.md'. Same conceptual purpose, different locations and names. Divergence inherited from source skill but unexplained.",
+    "evidence": "FR-006: 'check for defect-catalog.md in the spec directory'. Gap-audit: 'Check if specs/gap-patterns.md exists at the project level.'",
+    "suggested_fix": "Add assumption explaining the divergence: per-feature catalog matches source skill design, unification is future work.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "No cleanup behavior specified for /tmp/exploratory-tests/ after command completes. Files persist indefinitely.",
+    "evidence": "Edge case addresses existing directory (overwrite) but no FR or edge case addresses post-execution cleanup. Source skill also has no cleanup.",
+    "suggested_fix": "Add assumption: 'Test files in /tmp/exploratory-tests/ persist after execution. Cleanup is the user's responsibility.'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Weak ACs",
+    "description": "US2 AC1 checks for source: exploratory but not full schema compliance. A finding could have source but be missing reproduction field.",
+    "evidence": "US2 AC1: 'writes them... with source: exploratory added'. Contract defines 7 required fields. AC checks one.",
+    "suggested_fix": "Accept that FR-009 validation + FR-010 source injection together cover schema compliance. AC focuses on source injection specifically.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Cross-reference gaps",
+    "description": "FR-003 (version check) has no parity checklist item. Covered by SC-002 as boilerplate but not SC-001.",
+    "evidence": "Behavioral parity checklist: 33 items, none references version check. SC-002 lists 'version check'. Coverage boundary between SC-001 and SC-002 is implicit.",
+    "suggested_fix": "No change needed. SC-001 covers source skill behaviors, SC-002 covers boilerplate. Intentionally disjoint.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Unverifiable SCs",
+    "description": "SC-001 verification method is 'diffing source SKILL.md against extension command' but no procedure defines what constitutes 'pass' on each checklist item.",
+    "evidence": "SC-001: 'Verified by the parity checklist below.' Pass column has no definition (exact wording? semantic equivalence? reviewer sign-off?).",
+    "suggested_fix": "Add note: 'Each item passes when the command contains prose causing the LLM to produce the described behavior. Verification is by human review.'",
+    "source": "audit",
+    "scope": "spec"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "classification": "blocking",
+    "category": "Integration gaps",
+    "description": "Backtrace will reject exploratory findings at parse time. Backtrace validates first element against GapFinding fields (classification, category, description, evidence, suggested_fix). ExploratoryFinding has none of these except description. T016(c) acknowledges risk but this is a known integration failure, not a verification gap.",
+    "evidence": "Backtrace Section 4 validates GapFinding fields. ExploratoryFinding has severity/reproduction/expected/actual/spec_gap. Auto-detect glob .*-findings.json matches .exploratory-findings.json.",
+    "suggested_fix": "Add plan note that backtrace cannot consume exploratory findings. T016(c) should produce follow-up task on backtrace to make parser schema-aware.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "blocking",
+    "category": "Spec coverage gaps",
+    "description": "T011 omits the empty/whitespace-only response case that FR-009 specifies as the first parsing case. An implementer following T011 literally would not handle it.",
+    "evidence": "FR-009 lists 5 cases starting with empty/whitespace. T011 lists only 4 (no empty/whitespace).",
+    "suggested_fix": "Add empty/whitespace case to T011 as first parsing case.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "blocking",
+    "category": "Spec coverage gaps",
+    "description": "FR-012 uses bare git diff --name-only (no revision). Misses staged modifications. Gap-audit spec finding #1 flagged this but backtrace auditor rejected the fix (breaks consistency with gap-audit/backtrace which use same bare form).",
+    "evidence": "FR-012 and T010 both use bare git diff --name-only. Backtrace auditor rejected fix: 'changing only this extension breaks boilerplate consistency (SC-004)'.",
+    "suggested_fix": "Document as conscious decision: bare git diff matches gap-audit/backtrace convention. Accept limitation.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Edge case coverage",
+    "description": "T006 does not reference the spec.md missing error case. T005 validates existence, T006 reads. Validation happens before read but T006 doesn't note this.",
+    "evidence": "T005 validates spec.md existence. T006 reads spec.md without referencing the error case.",
+    "suggested_fix": "Add note to T006: spec.md existence already validated in Section 3.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "Source field injection (FR-010) only applies to persistence path (--output). Displayed findings don't have source field. Spec scopes it correctly ('before writing to JSON').",
+    "evidence": "FR-010: 'before writing to JSON'. T012 handles it. T013 display path doesn't include source.",
+    "suggested_fix": "Accept as-is. Source is persistence-only by spec design.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "T009 component 13 (compile failure as finding) comes from edge cases section, not FR-007. Implicit mapping.",
+    "evidence": "FR-007 lists 12 components. T009 adds component 13 from edge cases section.",
+    "suggested_fix": "Add cross-reference: 'Per edge case #2 in spec.md.'",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Contract tests",
+    "description": "Contract sets additionalProperties: false but subagent prompt doesn't instruct against extra fields. Subagent could add fields that fail contract validation.",
+    "evidence": "contracts/exploratory-findings.json: additionalProperties: false. T009 component 9 references data-model.md which doesn't mention the constraint.",
+    "suggested_fix": "Add to T009: instruct subagent to return ONLY specified fields.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Spec coverage gaps",
+    "description": "T012 says 'validate with jq' but doesn't include FR-011's validation failure warning message or do-not-delete instruction.",
+    "evidence": "FR-011: specific warning text and do-not-delete. T012: only 'validate with jq'.",
+    "suggested_fix": "Add FR-011 failure behavior to T012.",
+    "source": "audit",
+    "scope": "plan"
+  }
+]
