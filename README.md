@@ -17,31 +17,38 @@ flowchart TD
     B --> C["gap-audit<br>find what reviews missed"]
     C -->|"findings JSON"| D["backtrace<br>trace gaps to spec, propose fixes"]
     D -->|"updated artifacts"| B
+    B --> E["exploratory-test<br>exercise implementation"]
+    E -->|"findings JSON"| D
 
     style C fill:#fdd,stroke:#b00,stroke-width:2px,color:#000
     style D fill:#ddf,stroke:#006,stroke-width:2px,color:#000
+    style E fill:#fdf,stroke:#606,stroke-width:2px,color:#000
 ```
 
 1. Write your spec, plan, and tasks. Review gates run automatically.
 2. Run **gap-audit** to find gaps the standard reviews missed (orphan FRs, weak ACs, implicit assumptions, missing edge cases).
 3. Run **backtrace** to trace each gap back to the spec item that should have caught it, propose additions with adversarial auditor approval, and apply approved changes.
-4. Review gates re-run on the updated artifacts. Repeat until clean.
+4. After implementation, run **exploratory-test** to exercise the implementation beyond its success criteria and find edge cases the spec missed.
+5. Run **backtrace** on exploratory findings to trace gaps back to the spec.
+6. Review gates re-run on the updated artifacts. Repeat until clean.
 
 ## Extensions
 
-This repo provides two extensions:
+This repo provides three extensions:
 
 | Extension | Description | Command |
 |-----------|-------------|---------|
-| **gap-audit** | Adversarial gap auditor for specs and plans | `/speckit-gap-audit-audit` |
-| **backtrace** | Trace gap-audit findings back to spec gaps and propose additions | `/speckit-backtrace-trace` |
+| **gap-audit** | Adversarial gap auditor for specs and plans | `/speckit.gap-audit.audit` |
+| **backtrace** | Trace findings back to spec gaps and propose additions | `/speckit.backtrace.trace` |
+| **exploratory-test** | Adversarial tester that exercises implementations beyond success criteria | `/speckit.exploratory-test.test` |
 
 ### Installation
 
 ```bash
-# Install both extensions from a local clone
+# Install all extensions from a local clone
 specify extension add /path/to/sdd-skills/.specify/extensions/gap-audit
 specify extension add /path/to/sdd-skills/.specify/extensions/backtrace
+specify extension add /path/to/sdd-skills/.specify/extensions/exploratory-test
 ```
 
 ## Gap Audit
@@ -61,9 +68,26 @@ Dispatches an adversarial subagent to find gaps the standard review missed.
 
 The auditor applies 8 false positive filters and groups findings as blocking or non-blocking. See `.specify/extensions/gap-audit/README.md` for details.
 
+## Exploratory Test
+
+Dispatches an adversarial subagent to exercise a feature beyond its success criteria, writing and running tests to find edge cases and bugs the spec missed.
+
+```bash
+# Run exploratory tests against an implementation
+/speckit.exploratory-test.test specs/004-feature/
+
+# Specify a base branch for changed file discovery
+/speckit.exploratory-test.test specs/004-feature/ --base develop
+
+# Save findings to JSON (consumed by backtrace)
+/speckit.exploratory-test.test specs/004-feature/ --output
+```
+
+The tester applies 7 test vector categories (boundary value analysis, type edges, invariant violations, feature interaction, negative testing, mock fidelity, regression) with a self-check gate. See `.specify/extensions/exploratory-test/README.md` for details.
+
 ## Backtrace
 
-Closes the loop between finding gaps and fixing them. Traces gap-audit findings back to the spec artifacts that should have caught them, proposes additions, gets adversarial auditor approval, and applies approved changes.
+Closes the loop between finding gaps and fixing them. Traces findings back to the spec artifacts that should have caught them, proposes additions, gets adversarial auditor approval, and applies approved changes.
 
 ```bash
 # Run gap-audit with --output first to persist findings
@@ -85,15 +109,17 @@ After applying additions, backtrace invokes follow-up reviews (review-spec, revi
 sdd-skills/
 ├── .specify/
 │   ├── extensions/
-│   │   ├── backtrace/       # Backtrace extension
-│   │   └── gap-audit/       # Gap audit extension
+│   │   ├── backtrace/          # Backtrace extension
+│   │   ├── exploratory-test/   # Exploratory test extension
+│   │   └── gap-audit/          # Gap audit extension
 │   └── memory/
 │       └── constitution.md  # Synced from specs/constitution.md
 ├── specs/
 │   ├── constitution.md      # Project governance principles
 │   ├── gap-patterns.md      # Recurring gap audit patterns
 │   ├── 001-gap-audit-extension/
-│   └── 002-backtrace-extension/
+│   ├── 002-backtrace-extension/
+│   └── 004-exploratory-test-extension/
 └── brainstorm/              # Brainstorm session documents
 ```
 
