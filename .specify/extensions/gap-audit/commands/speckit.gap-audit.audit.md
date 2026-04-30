@@ -340,12 +340,13 @@ The subagent returned something that looks like JSON but fails to parse. Set PAR
 If the `--output` flag was set:
 
 1. Determine the output file path:
-   - Spec scope: `<spec_dir>/.sdd-findings-spec.json`
-   - Plan scope: `<spec_dir>/.sdd-findings-plan.json`
-2. Write the findings array (parsed JSON from Section 8) to the file
-3. If the file already exists, overwrite it
-4. Write an empty array `[]` when no findings survived filtering
-5. After writing, validate the JSON is parseable:
+   - Spec scope: `<spec_dir>/.gap-audit-spec-findings.json`
+   - Plan scope: `<spec_dir>/.gap-audit-plan-findings.json`
+2. Before writing, add `"source": "audit"` and `"scope": "<scope>"` (where `<scope>` is `spec` or `plan`) to each finding object in the array. These fields enable downstream tools (backtrace, pattern collector) to identify the origin and scope of findings without relying on filenames.
+3. Write the findings array (parsed JSON from Section 8, with source/scope fields added) to the file
+4. If the file already exists, overwrite it
+5. Write an empty array `[]` when no findings survived filtering
+6. After writing, validate the JSON is parseable:
 
 ```bash
 jq '.' <output_file> > /dev/null 2>&1 && echo "JSON_VALID=true" || echo "JSON_VALID=false"

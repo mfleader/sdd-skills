@@ -13,6 +13,8 @@ A single gap identified by the adversarial auditor subagent, after false positiv
 | description | string | yes | What the gap is |
 | evidence | string | yes | File reference, section, or quote from the audited artifact. When a false positive filter cannot verify the finding, prefixed with `"unverified: [reason]"` (FR-023) |
 | suggested_fix | string | yes | What to add or change to close the gap |
+| source | string | yes (on persist) | Origin of the finding (e.g., `"audit"`). Added when `--output` persists findings to JSON. Not present in subagent output. |
+| scope | string | yes (on persist) | Audit scope that produced the finding: `"spec"` or `"plan"`. Added when `--output` persists findings to JSON. |
 | pattern_match | string | no | Canonical name from `gap-patterns.md` when the finding matches a known recurring pattern |
 
 **Validation rules**:

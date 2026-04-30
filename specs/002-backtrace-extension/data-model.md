@@ -53,8 +53,8 @@ Finding received
 
 | File | Scope | Read | Write |
 |------|-------|------|-------|
-| `.sdd-findings-spec.json` | spec | yes (input) | no |
-| `.sdd-findings-plan.json` | plan | yes (input) | no |
+| `.*-findings.json` (e.g., `.gap-audit-spec-findings.json`) | spec | yes (input) | no |
+| `.*-findings.json` (e.g., `.gap-audit-plan-findings.json`) | plan | yes (input) | no |
 | `spec.md` | both | yes | yes (additions) |
 | `plan.md` | plan | yes | no (read-only for context) |
 | `tasks.md` | plan | yes | yes (new tasks) |

@@ -92,9 +92,10 @@ If any required files are missing, stop. Do not proceed to subsequent sections.
 
 Within the resolved spec directory, load findings:
 
-1. **Auto-detect**: Check for `.sdd-findings-{scope}.json` in the spec directory (where `{scope}` is `spec` or `plan`). This is the file produced by gap-audit `--output`.
-2. **Ask user**: If the auto-detected file does not exist, prompt the user: "Findings file not found at `<spec_dir>/.sdd-findings-{scope}.json`. Provide the path to a findings JSON file:"
+1. **Auto-detect**: Search the spec directory for files matching `.*-findings.json` (any source-named findings file). If multiple matches exist, prefer files whose name contains the current scope (e.g., `*-spec-findings.json` for spec scope, `*-plan-findings.json` for plan scope). If exactly one match exists, use it. If multiple scope-matching files exist, use the most recently modified. Also check for legacy filenames `.sdd-findings-{scope}.json` as a fallback.
+2. **Ask user**: If no auto-detected file exists, prompt the user: "No findings file found in `<spec_dir>`. Provide the path to a findings JSON file:"
 3. **Validate path**: If the user-provided path does not exist or is not readable, stop with: "Findings file not found: `<path>`". Also verify the path is within the project root (same validation as Section 3).
+4. **Read source metadata**: After loading findings, check if the first finding has a `source` field. If present, store the `source` and `scope` values for use in ProposedAddition output. If absent (legacy findings), set `source` to `"unknown"` and `scope` to the command's scope argument.
 
 ### Parse and validate findings
 
