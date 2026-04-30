@@ -1,0 +1,81 @@
+[
+  {
+    "classification": "blocking",
+    "category": "Naming collisions",
+    "description": "FR numbering in the 003 spec collides with the 002 spec's existing FR numbers. The new spec defines FR-001 through FR-012, but the base spec (002-backtrace-extension/spec.md) already defines FR-001 through FR-017. When the improvements are implemented, it will be ambiguous which FR-003 is being referenced.",
+    "evidence": "003-backtrace-improvements/spec.md defines FR-001 through FR-012. 002-backtrace-extension/spec.md lines 84-116 define FR-001 through FR-017. Both use the same numbering namespace with different meanings.",
+    "suggested_fix": "Use a different numbering scheme for the improvement spec. Either prefix with the feature number (e.g., FR-003-001) or continue from the base spec's numbering (FR-018 onward). Similarly, SC-001 through SC-006 in the new spec collide with SC-001 through SC-008 in the base spec."
+  },
+  {
+    "classification": "blocking",
+    "category": "Weak ACs",
+    "description": "US-001 acceptance scenario 1 does not define what 'no relevant FR for input validation exists' means. The barrier walk's relevance-matching criteria are never specified. An implementation could pass this AC by using keyword matching while failing on semantically equivalent but differently-worded FRs.",
+    "evidence": "spec.md US-001 acceptance scenario 1: 'Given a finding about unvalidated input and no FR for input validation exists.' FR-001 says 'Is there a relevant FR?' but never defines what 'relevant' means.",
+    "suggested_fix": "Add a definition of how the barrier walk determines relevance, or acknowledge this is delegated to LLM judgment and flag it as an uncertainty per Constitution Principle VII.",
+    "pattern_match": "missing-derived-fr"
+  },
+  {
+    "classification": "blocking",
+    "category": "Orphan FRs",
+    "description": "US-002 acceptance scenario 4 describes auditor behavior ('applies more skepticism to uncertain traces') that is covered by FR-006 but is unverifiable as an acceptance scenario. There is no way to externally observe whether the auditor 'actually changed its behavior' in auditing rigor.",
+    "evidence": "spec.md US-002 scenario 4: 'Then it applies more skepticism to uncertain traces than to direct ones.' FR-006: 'The auditor prompt must instruct the auditor to apply more skepticism.'",
+    "suggested_fix": "Reframe as verifiable: 'Then the auditor prompt includes explicit instructions to weight uncertain traces with more skepticism.' This verifies the prompt content, not the auditor behavior."
+  },
+  {
+    "classification": "blocking",
+    "category": "Implicit behavior",
+    "description": "FR-002 does not specify how to distinguish between new_AC and amended_AC when the barrier walk determines the missing layer is AC. The spec says 'propose new_AC or amended_AC' but never defines the criteria for choosing between them.",
+    "evidence": "spec.md FR-002: 'If FR exists but AC is missing, propose new_AC or amended_AC.' FR-003: 'The four tracing categories...still apply after the walk determines the correct spec layer.' The interaction between the barrier walk's layer determination and the existing new-vs-amended decision is not specified.",
+    "suggested_fix": "Clarify that the barrier walk determines the target layer, and the existing tracing categories determine whether the addition is new or amended within that layer."
+  },
+  {
+    "classification": "blocking",
+    "category": "Cross-reference gaps",
+    "description": "SC-001 says the walk happens 'before determining addition type' which suggests a preliminary step, but FR-003 says the walk is 'integrated into the existing tracing category logic, not a separate preliminary step.' These contradict each other.",
+    "evidence": "spec.md FR-003: 'not a separate preliminary step.' SC-001: 'walks the spec hierarchy...before determining addition type.'",
+    "suggested_fix": "Revise SC-001 to match FR-003's integration language, or remove the 'not a separate preliminary step' constraint from FR-003 if the ordering is what matters, not the integration mechanism."
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Weak ACs",
+    "description": "US-003 acceptance scenario 1 uses 'the same spec item' without defining what that means. FR-008 clarifies this as 'by target_section within target_artifact,' but the AC is imprecise when read independently.",
+    "evidence": "spec.md US-003 scenario 1: 'Given 3 or more applied additions all target the same spec item.' FR-008: 'count how many applied additions target each spec item (by target_section within target_artifact).'",
+    "suggested_fix": "Tighten US-003 scenario 1 to match FR-008: 'Given 3 or more applied additions all target the same target_section within the same target_artifact.'"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Weak ACs",
+    "description": "US-001 has acceptance scenarios for missing FR (scenario 1), missing AC (scenario 2), and missing SC (scenario 3), but none for the missing task layer described in FR-001 step 4.",
+    "evidence": "spec.md FR-001: '(4) If yes (plan scope), is there a task?' US-001 has no scenario for this case.",
+    "suggested_fix": "Add a fourth acceptance scenario: 'Given a finding and a relevant FR, AC, and SC all exist but no task covers the implementation (plan scope), When backtrace traces the finding, Then it proposes a new_task.'",
+    "pattern_match": "missing-condition-false-path"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit assumptions",
+    "description": "The spec assumes FR-AC-SC-task is a hierarchical parent-child relationship, but this hierarchy is not explicit in spec artifacts. Spec files use flat numbered lists without explicit parent-child links.",
+    "evidence": "spec.md FR-001: 'walk the spec hierarchy top-down.' The Assumptions section does not mention the requirement for a hierarchical relationship in the target spec.",
+    "suggested_fix": "Add an assumption: 'The barrier walk uses semantic association, not explicit parent-child IDs, to determine hierarchy between spec items.'"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "FR-007 requires output to include trace_certainty but does not specify the exact output format or where it appears in the existing output template.",
+    "evidence": "spec.md FR-007: 'The output (Section 11) must include the trace_certainty value for each applied and rejected addition.' No format example is provided.",
+    "suggested_fix": "Add an output format example showing trace_certainty placement, e.g., '1. [approve] FR-018: <summary> [direct]'."
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "FR-009 specifies cluster note text but not where it appears in the output relative to Applied Additions, Rejected Additions, and Reset Trigger Warning sections.",
+    "evidence": "spec.md FR-009: 'append a note.' SC-004: 'Output summary notes clusters.' Neither specifies structural placement.",
+    "suggested_fix": "Specify placement: 'Cluster notes appear after the Applied Additions section.'"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Unverifiable SCs",
+    "description": "SC-001 conflates a process requirement (walk happens) with an output requirement (addition targets correct layer). Verifying the walk occurred internally is not possible from output alone.",
+    "evidence": "spec.md SC-001: 'Backtrace walks the spec hierarchy...before determining addition type, and the addition targets the first missing layer.'",
+    "suggested_fix": "Split into output-verifiable criterion ('The addition targets the first missing layer') and note that the process is verified through US-001 independent tests."
+  }
+]
