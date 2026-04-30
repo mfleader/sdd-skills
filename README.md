@@ -142,6 +142,55 @@ The project follows 8 core principles defined in `specs/constitution.md`:
 
 Feature branches use sequential numbering: `001-feature-name`, `002-another-feature`. Commits follow [Conventional Commits](https://www.conventionalcommits.org/), signed and GPG-signed.
 
+### Adding a New Extension
+
+After implementing the extension command file, README, and extension.yml under `.specify/extensions/<name>/`, complete these additional steps before the feature is shippable.
+
+**1. Generate SKILL.md wrapper**
+
+Claude Code discovers slash commands via `.claude/skills/<command-name>/SKILL.md`. Generate the wrapper by prepending skill frontmatter to the command file body:
+
+```bash
+mkdir -p .claude/skills/speckit-<ext>-<verb>
+# Write frontmatter (name, description, compatibility, metadata) then append:
+sed '1,/^---$/d' .specify/extensions/<name>/commands/speckit.<ext>.<verb>.md \
+  >> .claude/skills/speckit-<ext>-<verb>/SKILL.md
+```
+
+**2. Update backtrace schema awareness** (if the extension produces findings)
+
+If the extension writes a `.*-findings.json` file, update the backtrace command file's Section 4 (Findings Resolution) to detect the new schema via the `source` field and normalize to GapFinding shape. Then regenerate the backtrace SKILL.md wrapper (step 5).
+
+**3. Update project README**
+
+- Add to the Extensions table
+- Add to the workflow diagram (Mermaid)
+- Add usage section with examples
+- Add to the project structure tree
+- Add to the installation instructions
+- Use dot notation for command names (e.g., `/speckit.ext.verb`, not `/speckit-ext-verb`)
+
+**4. Set extension license**
+
+Our extensions use `license: Apache-2.0` in extension.yml. Do not modify upstream speckit extension licenses (spex, spex-gates, spex-deep-review, spex-teams, spex-worktrees, git). Those are MIT and not ours to change.
+
+**5. Regenerate SKILL.md wrappers for any edited extensions**
+
+If you edited another extension's command file (e.g., backtrace for schema awareness), regenerate its SKILL.md wrapper using the same process as step 1.
+
+### Branch Cleanup Before Merge
+
+Squash the feature branch into exactly 3 commits:
+
+1. `docs(<scope>)`: All spec artifacts (spec.md, plan.md, tasks.md, research.md, data-model.md, contracts/, checklists/, REVIEW-*.md, review-findings.md)
+2. `feat(<scope>)`: All implementation files (extension.yml, command files, README, SKILL.md wrappers)
+3. `docs` or `chore`: Project README updates, CLAUDE.md changes, config changes
+
+Fast-forward merge to main. After merge:
+- Clear `CLAUDE.md` plan pointer (remove the "Current plan:" line)
+- Delete the feature branch
+- Clean up `.specify/.spex-state` and `.specify/feature.json` if stale
+
 ## License
 
 Apache 2.0. See [LICENSE](LICENSE).
