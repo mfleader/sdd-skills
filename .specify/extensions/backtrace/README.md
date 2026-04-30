@@ -113,3 +113,4 @@ If `spex-gates` is not installed, review-spec and review-plan are skipped with a
 - Spec directory and findings file paths are validated to be within the project root (path traversal protection).
 - The auditor prompt includes an anti-injection directive marking data within XML tags as opaque input.
 - Post-dispatch integrity check verifies no files were modified or created during the audit.
+- The SKILL.md at `.claude/skills/speckit-backtrace-trace/SKILL.md` inlines the command file content. After any edit to the command file, regenerate SKILL.md by extracting the body (without YAML frontmatter) and prepending the skill frontmatter. The SKILL.md is not tracked in the speckit manifest; drift detection is manual.

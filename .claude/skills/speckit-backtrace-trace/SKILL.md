@@ -1,5 +1,10 @@
 ---
-description: "Trace gap-audit findings back to missing spec items and propose additions"
+name: speckit-backtrace-trace
+description: Trace gap-audit findings back to missing spec items and propose additions
+compatibility: Requires spec-kit project structure with .specify/ directory
+metadata:
+  author: github-spec-kit
+  source: backtrace:commands/speckit.backtrace.trace.md
 ---
 
 # Backtrace Command

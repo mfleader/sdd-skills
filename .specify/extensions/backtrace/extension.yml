@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: backtrace
   name: "SDD Backtrace"
-  version: "0.1.0"
+  version: "0.2.0"
   description: "Trace gap-audit findings back to missing spec items and propose additions"
   author: cc-spex
   license: MIT
