@@ -6,7 +6,7 @@ extension:
   version: "1.0.0"
   description: "Multi-perspective code review with 5 specialized agents and autonomous fix loop"
   author: cc-spex
-  license: Apache-2.0
+  license: MIT
 
 requires:
   speckit_version: ">=0.5.2"

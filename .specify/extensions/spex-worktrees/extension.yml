@@ -6,7 +6,7 @@ extension:
   version: "1.0.0"
   description: "Git worktree isolation for feature development"
   author: cc-spex
-  license: Apache-2.0
+  license: MIT
 
 requires:
   speckit_version: ">=0.5.2"

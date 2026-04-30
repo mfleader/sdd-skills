@@ -104,15 +104,31 @@ Within the resolved spec directory, load findings:
 
 ### Parse and validate findings
 
-Read the findings file. Parse it as a JSON array of GapFinding objects.
+Read the findings file. Parse it as a JSON array.
+
+**Schema detection:** Check the `source` field of the first element to determine the findings schema:
+
+- If `source` is `"audit"` or absent: validate against GapFinding fields (`classification`, `category`, `description`, `evidence`, `suggested_fix`).
+- If `source` is `"exploratory"`: validate against ExploratoryFinding fields (`severity`, `description`, `reproduction`, `expected`, `actual`, `spec_gap`).
+- If `source` is unrecognized: attempt GapFinding validation first, then ExploratoryFinding as fallback. If both fail, stop with the parse error below.
+
+**Normalization:** When the source is `"exploratory"`, normalize each finding to GapFinding shape at parse time so downstream sections work unchanged:
+
+| ExploratoryFinding field | Maps to GapFinding field | Logic |
+|---|---|---|
+| severity | classification | critical/important → blocking, moderate/minor → non-blocking |
+| description | description | pass through |
+| reproduction + expected + actual | evidence | concatenate: "Reproduction: {reproduction}\nExpected: {expected}\nActual: {actual}" |
+| spec_gap | suggested_fix | pass through (the spec gap is the fix target) |
+| (inferred) | category | Infer from description: if mentions boundary/edge → "edge case not covered"; if mentions interaction/integration → "missing integration scenario"; if mentions assumption/constraint → "implicit assumption"; default → "missing test coverage" |
 
 **Validation:**
-- If the file is not valid JSON, stop with a parse error: "Invalid findings format. Expected a JSON array of GapFinding objects with fields: classification, category, description, evidence, suggested_fix"
+- If the file is not valid JSON, stop with a parse error: "Invalid findings format. Expected a JSON array of finding objects."
 - If the JSON is valid but not an array, stop with: "Invalid findings format. Expected a JSON array, got [type]"
 - If the array is empty, report "No findings to trace" and exit cleanly (skip all remaining sections)
-- Validate that at least the first element has the required GapFinding fields: `classification`, `category`, `description`, `evidence`, `suggested_fix`. If validation fails, stop with the parse error above.
+- Validate that at least the first element has the required fields for its detected schema (see above). If validation fails, stop with the parse error.
 
-Store the parsed findings array for Section 5.
+Store the parsed (and normalized) findings array for Section 5.
 
 ## Section 5: Artifact Loading
 

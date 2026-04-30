@@ -7,7 +7,7 @@ extension:
   description: "Feature branch creation, numbering (sequential/timestamp), validation, and Git remote detection"
   author: spec-kit-core
   repository: https://github.com/github/spec-kit
-  license: Apache-2.0
+  license: MIT
 
 requires:
   speckit_version: ">=0.2.0"
