@@ -1,0 +1,23 @@
+schema_version: "1.0"
+
+extension:
+  id: exploratory-test
+  name: "SDD Exploratory Test"
+  version: "0.1.0"
+  description: "Dispatch an adversarial subagent to exercise a feature beyond its success criteria, finding edge cases and bugs the spec missed"
+  author: cc-spex
+  license: MIT
+
+requires:
+  speckit_version: ">=0.5.2"
+
+provides:
+  commands:
+    - name: speckit.exploratory-test.test
+      file: commands/speckit.exploratory-test.test.md
+      description: "Run adversarial exploratory tests against an implementation"
+
+tags:
+  - "sdd"
+  - "testing"
+  - "quality"
