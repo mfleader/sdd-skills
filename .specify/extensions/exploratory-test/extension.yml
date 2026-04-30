@@ -6,7 +6,7 @@ extension:
   version: "0.1.0"
   description: "Dispatch an adversarial subagent to exercise a feature beyond its success criteria, finding edge cases and bugs the spec missed"
   author: cc-spex
-  license: MIT
+  license: Apache-2.0
 
 requires:
   speckit_version: ">=0.5.2"

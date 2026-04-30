@@ -6,7 +6,7 @@ extension:
   version: "0.2.0"
   description: "Trace gap-audit findings back to missing spec items and propose additions"
   author: cc-spex
-  license: MIT
+  license: Apache-2.0
 
 requires:
   speckit_version: ">=0.5.2"

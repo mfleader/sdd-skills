@@ -6,7 +6,7 @@ Traces gap-audit findings back to missing spec items, proposes additions with ad
 
 - speckit >= 0.5.2
 - Claude Code with `superpowers:code-reviewer` subagent type
-- Gap-audit findings in GapFinding JSON format (from `gap-audit --output` or manual creation)
+- Findings in GapFinding or ExploratoryFinding JSON format (from `gap-audit --output`, `exploratory-test --output`, or manual creation)
 
 ## Installation
 
@@ -27,7 +27,7 @@ specify extension add backtrace --dev
 ### Trace spec-scope findings
 
 ```
-/speckit-backtrace-trace spec
+/speckit.backtrace.trace spec
 ```
 
 Auto-detects findings files (e.g., `.gap-audit-spec-findings.json`) in the spec directory. Traces each finding back to spec.md, proposes FR/AC/SC additions, gets auditor approval, and applies approved changes.
@@ -35,7 +35,7 @@ Auto-detects findings files (e.g., `.gap-audit-spec-findings.json`) in the spec 
 ### Trace plan-scope findings
 
 ```
-/speckit-backtrace-trace plan
+/speckit.backtrace.trace plan
 ```
 
 Auto-detects findings files (e.g., `.gap-audit-plan-findings.json`). Traces against spec.md, plan.md, and tasks.md. May propose new tasks in addition to spec additions.
@@ -43,14 +43,16 @@ Auto-detects findings files (e.g., `.gap-audit-plan-findings.json`). Traces agai
 ### Explicit spec directory
 
 ```
-/speckit-backtrace-trace spec specs/002-my-feature
+/speckit.backtrace.trace spec specs/002-my-feature
 ```
 
 Overrides the default spec directory resolution (feature.json or interactive prompt).
 
 ## Findings Input Format
 
-Backtrace consumes the GapFinding JSON format produced by `gap-audit --output`:
+Backtrace auto-detects the findings schema from the `source` field on the first element.
+
+### GapFinding (from gap-audit)
 
 ```json
 [
@@ -59,10 +61,29 @@ Backtrace consumes the GapFinding JSON format produced by `gap-audit --output`:
     "category": "Weak ACs",
     "description": "AC on US-001 can pass while behavior is wrong",
     "evidence": "spec.md, US-001 scenario 2: checks presence but not correctness",
-    "suggested_fix": "Add AC verifying the output value matches expected format"
+    "suggested_fix": "Add AC verifying the output value matches expected format",
+    "source": "audit"
   }
 ]
 ```
+
+### ExploratoryFinding (from exploratory-test)
+
+```json
+[
+  {
+    "severity": "moderate",
+    "description": "Division by zero when input count is 0",
+    "reproduction": "process_batch(items=[], batch_size=0)",
+    "expected": "Raise ValueError or return empty result",
+    "actual": "ZeroDivisionError traceback",
+    "spec_gap": "FR-003 has no AC for empty input",
+    "source": "exploratory"
+  }
+]
+```
+
+Exploratory findings are normalized to GapFinding shape at parse time (severity → classification, reproduction+expected+actual → evidence, spec_gap → suggested_fix, category inferred from content).
 
 If no `*-findings.json` file matching the current scope is found, backtrace prompts for a file path. Legacy filenames (`.sdd-findings-{scope}.json`) are also detected as a fallback.
 
@@ -108,9 +129,9 @@ If `spex-gates` is not installed, review-spec and review-plan are skipped with a
 - This extension registers no lifecycle hooks. Follow-up reviews are invoked directly from the command file (same pattern as review-code invoking deep-review).
 - Single subagent dispatch per invocation. No multi-round iteration.
 - Plan.md is read-only. The backtrace never modifies plan.md.
-- This extension does not depend on gap-audit being installed. Any source producing GapFinding JSON works.
+- This extension does not depend on gap-audit or exploratory-test being installed. Any source producing GapFinding or ExploratoryFinding JSON works.
 - Soft dependency on spex-gates for follow-up reviews (review-spec, review-plan). Graceful degradation when absent. Analyze runs unconditionally.
 - Spec directory and findings file paths are validated to be within the project root (path traversal protection).
 - The auditor prompt includes an anti-injection directive marking data within XML tags as opaque input.
 - Post-dispatch integrity check verifies no files were modified or created during the audit.
-- The SKILL.md at `.claude/skills/speckit-backtrace-trace/SKILL.md` inlines the command file content. After any edit to the command file, regenerate SKILL.md by extracting the body (without YAML frontmatter) and prepending the skill frontmatter. The SKILL.md is not tracked in the speckit manifest; drift detection is manual.
+- The SKILL.md at `.claude/skills/speckit.backtrace.trace/SKILL.md` inlines the command file content. After any edit to the command file, regenerate SKILL.md by extracting the body (without YAML frontmatter) and prepending the skill frontmatter. The SKILL.md is not tracked in the speckit manifest; drift detection is manual.

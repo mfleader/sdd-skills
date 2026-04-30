@@ -6,7 +6,7 @@ extension:
   version: "1.0.0"
   description: "Specification-Driven Development core workflow for AI agents"
   author: cc-spex
-  license: MIT
+  license: Apache-2.0
 
 requires:
   speckit_version: ">=0.5.2"

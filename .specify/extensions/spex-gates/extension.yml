@@ -6,7 +6,7 @@ extension:
   version: "1.0.0"
   description: "Quality gates for specification-driven development: spec review, plan review, code review, and verification"
   author: cc-spex
-  license: MIT
+  license: Apache-2.0
 
 requires:
   speckit_version: ">=0.5.2"

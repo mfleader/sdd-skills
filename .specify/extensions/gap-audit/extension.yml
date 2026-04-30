@@ -6,7 +6,7 @@ extension:
   version: "0.1.0"
   description: "Adversarial gap auditor for SDD artifacts — dispatches a prejudiced subagent to find gaps in specs and plans"
   author: cc-spex
-  license: MIT
+  license: Apache-2.0
 
 requires:
   speckit_version: ">=0.5.2"

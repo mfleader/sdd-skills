@@ -97,7 +97,7 @@ The extension follows all speckit conventions: version check, spec directory res
 
 3. **Given** the subagent modifies files in the repo during execution, **When** the subagent returns, **Then** the extension warns "Files were modified during testing (integrity violation). Review changes with `git diff`."
 
-4. **Given** the subagent creates new untracked files in the repo (but does not modify existing files), **When** the subagent returns, **Then** the extension warns "Files were created during testing (integrity violation). Review changes with `git diff`."
+4. **Given** the subagent creates new untracked files in the repo (but does not modify existing files), **When** the subagent returns, **Then** the extension warns "Files were created during testing (integrity violation). Review changes with `git status`."
 
 5. **Given** the subagent returns non-JSON prose, **When** the extension parses the response, **Then** it attempts JSON extraction via bracket matching. If extraction fails or validation fails, it sets PARSE_FAILED and treats as empty array.
 

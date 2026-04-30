@@ -57,13 +57,13 @@ Dispatches an adversarial subagent to find gaps the standard review missed.
 
 ```bash
 # Audit a spec for orphan FRs, weak ACs, unverifiable SCs, implicit assumptions, etc.
-/speckit-gap-audit-audit spec
+/speckit.gap-audit.audit spec
 
 # Audit plan + tasks for missing contract tests, integration gaps, edge case coverage
-/speckit-gap-audit-audit plan
+/speckit.gap-audit.audit plan
 
 # Save findings to JSON (consumed by backtrace)
-/speckit-gap-audit-audit spec --output
+/speckit.gap-audit.audit spec --output
 ```
 
 The auditor applies 8 false positive filters and groups findings as blocking or non-blocking. See `.specify/extensions/gap-audit/README.md` for details.
@@ -90,15 +90,17 @@ The tester applies 7 test vector categories (boundary value analysis, type edges
 Closes the loop between finding gaps and fixing them. Traces findings back to the spec artifacts that should have caught them, proposes additions, gets adversarial auditor approval, and applies approved changes.
 
 ```bash
-# Run gap-audit with --output first to persist findings
-/speckit-gap-audit-audit spec --output
+# Trace gap-audit findings back to spec gaps
+/speckit.gap-audit.audit spec --output
+/speckit.backtrace.trace spec
 
-# Then run backtrace to trace and fix the gaps
-/speckit-backtrace-trace spec
+# Trace exploratory test findings back to spec gaps
+/speckit.exploratory-test.test specs/004-feature/ --output
+/speckit.backtrace.trace spec
 
 # Plan-scope (traces against spec + plan + tasks)
-/speckit-gap-audit-audit plan --output
-/speckit-backtrace-trace plan
+/speckit.gap-audit.audit plan --output
+/speckit.backtrace.trace plan
 ```
 
 After applying additions, backtrace invokes follow-up reviews (review-spec, review-plan, analyze) automatically. See `.specify/extensions/backtrace/README.md` for details.
