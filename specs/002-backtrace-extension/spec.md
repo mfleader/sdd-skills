@@ -81,7 +81,7 @@ Backtrace closes the loop between finding gaps and fixing them. When a gap audit
 
 **Backtrace command (`speckit.backtrace.trace`):**
 
-- **FR-001**: Accept a list of findings (GapFinding JSON array) and a spec directory path. Findings are resolved in this order: (1) check the spec directory for `.sdd-findings-{scope}.json` (produced by gap-audit `--output`), (2) if not found, ask the user for a file path. If the user-provided path does not exist or is not readable, stop with "Findings file not found: `<path>`".
+- **FR-001**: Accept a list of findings (GapFinding JSON array) and a spec directory path. Findings are resolved in this order: (1) search the spec directory for `.*-findings.json` files, preferring files whose name contains the current scope (e.g., `*-spec-findings.json` for spec scope); also check for legacy `.sdd-findings-{scope}.json` as fallback, (2) if not found, ask the user for a file path. If the user-provided path does not exist or is not readable, stop with "Findings file not found: `<path>`".
 - **FR-002**: Accept a scope argument (`spec` or `plan`) indicating which artifacts to trace against. If scope is missing or invalid, stop with an error listing the valid values (`spec`, `plan`).
 - **FR-002a**: Resolve the spec directory path in this order: (1) path provided as an argument, (2) `.specify/feature.json` `feature_directory` value, (3) ask the user. This follows the same resolution pattern as gap-audit.
 - **FR-003**: For each finding, trace it back to identify which AC, FR, or SC should have caught it:

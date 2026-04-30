@@ -86,8 +86,8 @@ When no findings survive filtering: `No issues found.`
 
 Same presentation as above, plus a JSON file written to the spec directory:
 
-- Spec scope: `<spec_dir>/.sdd-findings-spec.json`
-- Plan scope: `<spec_dir>/.sdd-findings-plan.json`
+- Spec scope: `<spec_dir>/.gap-audit-spec-findings.json`
+- Plan scope: `<spec_dir>/.gap-audit-plan-findings.json`
 
 JSON schema:
 

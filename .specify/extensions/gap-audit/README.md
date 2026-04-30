@@ -46,7 +46,7 @@ Reads `spec.md`, `plan.md`, and `tasks.md` and checks for: missing contract test
 /speckit.gap-audit.audit plan --output
 ```
 
-Writes findings to `.sdd-findings-spec.json` or `.sdd-findings-plan.json` in the spec directory. Overwrites any existing file from a previous run.
+Writes findings to `.gap-audit-spec-findings.json` or `.gap-audit-plan-findings.json` in the spec directory. Each finding includes `source` and `scope` fields. Overwrites any existing file from a previous run.
 
 ## Gap Patterns
 

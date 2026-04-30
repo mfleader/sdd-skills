@@ -83,7 +83,7 @@ A skill author wants to save the audit findings for later reference or automated
 
 **Acceptance Scenarios**:
 
-1. **Given** a spec directory with gaps, **When** the user invokes the gap audit with `--output`, **Then** the command writes findings to `<spec_dir>/.sdd-findings-spec.json` (spec focus) or `<spec_dir>/.sdd-findings-plan.json` (plan focus) as valid JSON.
+1. **Given** a spec directory with gaps, **When** the user invokes the gap audit with `--output`, **Then** the command writes findings to `<spec_dir>/.gap-audit-spec-findings.json` (spec focus) or `<spec_dir>/.gap-audit-plan-findings.json` (plan focus) as valid JSON. Each finding includes `"source": "audit"` and `"scope"` fields.
 2. **Given** a spec directory with gaps, **When** the user invokes the gap audit without `--output`, **Then** no findings file is written to the spec directory.
 3. **Given** a spec directory with a `gap-patterns.md` file containing recurring patterns, **When** the auditor finds a gap that matches a known pattern, **Then** the corresponding finding includes a `pattern_match` field with the canonical pattern name.
 4. **Given** `--output` is set and a findings JSON file already exists from a previous run, **When** the command completes, **Then** the previous file is overwritten with the new findings.
@@ -110,7 +110,7 @@ A skill author wants to save the audit findings for later reference or automated
 - **FR-004**: The command MUST dispatch an adversarial auditor subagent using the `superpowers:code-reviewer` subagent type with the full checklist, classification scheme, and output constraints embedded in the prompt.
 - **FR-005**: The subagent MUST NOT modify any files.
 - **FR-006**: The command MUST apply 8 false positive filters to raw subagent findings before reporting: (1) verify technical claims against actual APIs, (2) cross-reference tasks before claiming gaps, (3) distinguish FRs from acceptance scenarios, (4) don't group findings with different root causes, (5) classify pre-existing behavior correctly, (6) accept human-verified criteria, (7) acknowledge existing coverage before claiming gaps, (8) default to "plan diverges from spec" framing.
-- **FR-007**: When the `--output` flag is set, the command MUST write findings to `<spec_dir>/.sdd-findings-spec.json` for spec focus and `<spec_dir>/.sdd-findings-plan.json` for plan focus. When the flag is not set, the command MUST NOT write a findings file.
+- **FR-007**: When the `--output` flag is set, the command MUST write findings to `<spec_dir>/.gap-audit-spec-findings.json` for spec focus and `<spec_dir>/.gap-audit-plan-findings.json` for plan focus. Each finding object MUST include `"source": "audit"` and `"scope": "<focus>"` fields. When the flag is not set, the command MUST NOT write a findings file.
 - **FR-008**: Each finding MUST contain these fields: `classification` (blocking or non-blocking), `category`, `description`, `evidence`, `suggested_fix`.
 - **FR-009**: When a finding matches a known recurring pattern from `gap-patterns.md`, the finding MUST include a `pattern_match` field with the canonical pattern name.
 - **FR-010**: The command MUST optionally load `specs/gap-patterns.md` (project-level) if it exists and include its patterns in the subagent prompt.

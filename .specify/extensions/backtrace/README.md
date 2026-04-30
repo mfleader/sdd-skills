@@ -30,7 +30,7 @@ specify extension add backtrace --dev
 /speckit-backtrace-trace spec
 ```
 
-Reads findings from `.sdd-findings-spec.json` in the spec directory. Traces each finding back to spec.md, proposes FR/AC/SC additions, gets auditor approval, and applies approved changes.
+Auto-detects findings files (e.g., `.gap-audit-spec-findings.json`) in the spec directory. Traces each finding back to spec.md, proposes FR/AC/SC additions, gets auditor approval, and applies approved changes.
 
 ### Trace plan-scope findings
 
@@ -38,7 +38,7 @@ Reads findings from `.sdd-findings-spec.json` in the spec directory. Traces each
 /speckit-backtrace-trace plan
 ```
 
-Reads findings from `.sdd-findings-plan.json`. Traces against spec.md, plan.md, and tasks.md. May propose new tasks in addition to spec additions.
+Auto-detects findings files (e.g., `.gap-audit-plan-findings.json`). Traces against spec.md, plan.md, and tasks.md. May propose new tasks in addition to spec additions.
 
 ### Explicit spec directory
 
@@ -64,7 +64,7 @@ Backtrace consumes the GapFinding JSON format produced by `gap-audit --output`:
 ]
 ```
 
-If the auto-detected file (`.sdd-findings-{scope}.json`) is not found, backtrace prompts for a file path.
+If no `*-findings.json` file matching the current scope is found, backtrace prompts for a file path. Legacy filenames (`.sdd-findings-{scope}.json`) are also detected as a fallback.
 
 ## Output Format
 
@@ -94,7 +94,7 @@ If `spex-gates` is not installed, review-spec and review-plan are skipped with a
 
 | File | Read | Write |
 |------|------|-------|
-| `.sdd-findings-{scope}.json` | yes (input) | no |
+| `.*-findings.json` (e.g., `.gap-audit-spec-findings.json`) | yes (input) | no |
 | `spec.md` | yes | yes (additions) |
 | `plan.md` | yes (plan scope) | no (read-only) |
 | `tasks.md` | yes (plan scope) | yes (new tasks, plan scope) |

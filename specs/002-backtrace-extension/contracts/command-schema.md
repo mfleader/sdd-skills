@@ -20,7 +20,7 @@ If no spec directory argument is provided, resolve via:
 2. Ask user
 
 Within the resolved spec directory, findings are loaded from:
-1. `.sdd-findings-{scope}.json` (if exists)
+1. `.*-findings.json` files, preferring scope-matching names (e.g., `*-spec-findings.json`); legacy `.sdd-findings-{scope}.json` as fallback
 2. Ask user for file path (if step 1 fails)
 
 ### Errors
