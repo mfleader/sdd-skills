@@ -121,6 +121,7 @@ sdd-skills/
 │   ├── gap-patterns.md      # Recurring gap audit patterns
 │   ├── 001-gap-audit-extension/
 │   ├── 002-backtrace-extension/
+│   ├── 003-backtrace-improvements/
 │   └── 004-exploratory-test-extension/
 └── brainstorm/              # Brainstorm session documents
 ```
@@ -148,25 +149,56 @@ After implementing the extension command file, README, and extension.yml under `
 
 **1. Generate SKILL.md wrapper**
 
-Claude Code discovers slash commands via `.claude/skills/<command-name>/SKILL.md`. Generate the wrapper by prepending skill frontmatter to the command file body:
+Claude Code discovers slash commands via `.claude/skills/<command-name>/SKILL.md`. The `.claude/skills/` directory is gitignored, so you must `git add -f` when committing.
+
+Two patterns exist. Use the **indirection pattern** (preferred for large command files) or the **inline pattern** (used by backtrace and exploratory-test):
+
+*Indirection pattern* (gap-audit uses this). A short wrapper that tells Claude Code to read and follow the extension command file:
+
+```markdown
+---
+name: speckit-<ext>-<verb>
+description: <description>
+compatibility: Requires spec-kit project structure with .specify/ directory
+metadata:
+  author: github-spec-kit
+  source: <ext>:commands/speckit.<ext>.<verb>.md
+---
+
+# <Title>
+
+## Overview
+<Brief description>
+
+## Execution
+1. Read `.specify/extensions/<ext>/commands/speckit.<ext>.<verb>.md`
+2. Follow the instructions in the command file exactly
+3. Pass through any arguments provided by the user via `$ARGUMENTS`
+```
+
+*Inline pattern* (backtrace and exploratory-test use this). The full command file body with skill frontmatter prepended:
 
 ```bash
 mkdir -p .claude/skills/speckit-<ext>-<verb>
-# Write frontmatter (name, description, compatibility, metadata) then append:
+# Write frontmatter, then append command file body (strip YAML frontmatter):
 sed '1,/^---$/d' .specify/extensions/<name>/commands/speckit.<ext>.<verb>.md \
   >> .claude/skills/speckit-<ext>-<verb>/SKILL.md
+# Stage the gitignored file:
+git add -f .claude/skills/speckit-<ext>-<verb>/SKILL.md
 ```
+
+Pick one pattern and be consistent within the extension. Either pattern works. Indirection avoids SKILL.md drift but adds one read hop. Inline eliminates the hop but requires regeneration on every command file edit.
 
 **2. Update backtrace schema awareness** (if the extension produces findings)
 
-If the extension writes a `.*-findings.json` file, update the backtrace command file's Section 4 (Findings Resolution) to detect the new schema via the `source` field and normalize to GapFinding shape. Then regenerate the backtrace SKILL.md wrapper (step 5).
+If the extension writes a `.*-findings.json` file, update the backtrace command file's Section 4 (Findings Resolution, around line 104) to detect the new `source` value and normalize to GapFinding shape. See the existing `"exploratory"` mapping as a reference for the normalization table format. GapFinding fields: `classification`, `category`, `description`, `evidence`, `suggested_fix`. Then regenerate the backtrace SKILL.md wrapper (step 5).
 
 **3. Update project README**
 
 - Add to the Extensions table
 - Add to the workflow diagram (Mermaid)
 - Add usage section with examples
-- Add to the project structure tree
+- Add to the project structure tree (verify the tree is current first)
 - Add to the installation instructions
 - Use dot notation for command names (e.g., `/speckit.ext.verb`, not `/speckit-ext-verb`)
 
@@ -176,7 +208,7 @@ Our extensions use `license: Apache-2.0` in extension.yml. Do not modify upstrea
 
 **5. Regenerate SKILL.md wrappers for any edited extensions**
 
-If you edited another extension's command file (e.g., backtrace for schema awareness), regenerate its SKILL.md wrapper using the same process as step 1.
+If you edited another extension's command file (e.g., backtrace for schema awareness), regenerate its SKILL.md wrapper using the same process as step 1. Remember to `git add -f` the regenerated file.
 
 ### Branch Cleanup Before Merge
 
@@ -187,9 +219,11 @@ Squash the feature branch into exactly 3 commits:
 3. `docs` or `chore`: Project README updates, CLAUDE.md changes, config changes
 
 Fast-forward merge to main. After merge:
-- Clear `CLAUDE.md` plan pointer (remove the "Current plan:" line)
-- Delete the feature branch
-- Clean up `.specify/.spex-state` and `.specify/feature.json` if stale
+- Clear `CLAUDE.md` plan pointer: the line is inside `<!-- SPECKIT START/END -->` markers. Edit CLAUDE.md directly to remove the "Current plan:" line. Speckit will not overwrite it unless you re-run `specify init`.
+- Delete the feature branch: `git branch -d <branch-name>`
+- Clear `.specify/feature.json`: write `{}` to reset it
+- Delete `.specify/.spex-state` if it exists (stale flow state)
+- Delete `.specify/.sdd-phase` if it exists (stale drive state)
 
 ## License
 
