@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: gap-audit
   name: "SDD Gap Audit"
-  version: "0.1.0"
+  version: "1.0.0"
   description: "Adversarial gap auditor for SDD artifacts — dispatches a prejudiced subagent to find gaps in specs and plans"
   author: cc-spex
   license: Apache-2.0

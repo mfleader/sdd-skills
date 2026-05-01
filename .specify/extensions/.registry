@@ -105,7 +105,7 @@
       "installed_at": "2026-04-28T15:02:56.513859+00:00"
     },
     "backtrace": {
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "local",
       "manifest_hash": "sha256:f4dfb22500c89c2ef30fc479967cd8ef151862da819d73863e1a9067101314e2",
       "enabled": true,
@@ -119,7 +119,7 @@
       "installed_at": "2026-04-28T17:36:05.215770+00:00"
     },
     "gap-audit": {
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "local",
       "manifest_hash": "sha256:53962fd081a98d2073e718735bcb3a3ea67ab8467facd6459d25374b48eaa070",
       "enabled": true,
@@ -131,6 +131,20 @@
       },
       "registered_skills": [],
       "installed_at": "2026-04-27T18:37:00.000000+00:00"
+    },
+    "exploratory-test": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.exploratory-test.test"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-30T00:00:00.000000+00:00"
     }
   }
 }

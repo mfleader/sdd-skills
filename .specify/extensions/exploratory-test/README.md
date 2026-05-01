@@ -77,21 +77,44 @@ When `--output` is passed, findings conform to the schema in `contracts/explorat
 
 ## Defect Catalog Integration
 
-Create a `defect-catalog.md` file in the spec directory (adjacent to `spec.md`) with an "Exploratory Testing Probes" section to track recurring defect patterns. When present, the tester uses these as additional test vectors and tags matching findings with `"pattern_match"`.
+The extension reads `specs/defect-catalog.md` at the project level (not per-spec) to load recurring defect patterns. When present, the tester uses patterns from the "Exploratory Testing Probes" section as additional test vectors and tags matching findings with `"pattern_match"`.
+
+The defect catalog is externally produced (each project brings its own collector tooling). The catalog uses TOML frontmatter (`+++` delimited) for metadata, with consumer-specific sections under H2 headings.
 
 Format:
 
 ```markdown
++++
+version = 1
+last_updated = "2026-05-01"
+specs_analyzed = ["042", "043", "044"]
+pattern_count = 3
++++
+
 # Defect Catalog
+
+## Gap Audit Patterns
+
+(Consumed by the gap-audit extension)
+
+### missing-condition-false-path
+
+**Category**: Weak ACs
+**Trigger**: For every conditional FR (if X then Y), check that an AC exists for the condition-false path.
+**Remediation**: Test both boundaries explicitly.
 
 ## Exploratory Testing Probes
 
-### missing-condition-false-path
-For every conditional FR, check that the implementation handles the condition-false path.
+(Consumed by this extension)
 
 ### off-by-one-boundary
-Check boundary conditions for fencepost errors in loops and range checks.
+
+**Category**: Edge case coverage
+**Trigger**: Check boundary conditions for fencepost errors in loops and range checks.
+**Remediation**: Verify loop bounds and range checks handle +/- 1 correctly.
 ```
+
+Entry fields: `canonical-name` (H3 heading, required), `Category` (required), `Trigger` (required), `Occurrences`, `Source`, `Also known as`, `Remediation`, `Example` (all optional).
 
 ## Notes
 

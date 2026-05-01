@@ -83,25 +83,29 @@ If any files are missing, stop. Do not proceed to subsequent sections.
 
 Read all three files and store their full content.
 
-## Section 5: Gap-Patterns Loading
+## Section 5: Defect Catalog Loading
 
-Check if `specs/gap-patterns.md` exists at the project level (not per-feature).
+Check if `specs/defect-catalog.md` exists at the project level (relative to the working directory).
 
 ```bash
-if [ -f "specs/gap-patterns.md" ]; then
-  echo "GAP_PATTERNS_FOUND=true"
+if [ -f "specs/defect-catalog.md" ]; then
+  echo "DEFECT_CATALOG_FOUND=true"
 else
-  echo "GAP_PATTERNS_FOUND=false"
+  echo "DEFECT_CATALOG_FOUND=false"
 fi
 ```
 
 If the file exists:
 - Read its content
-- Validate it contains at least one pattern with `name`, `category`, and `trigger` fields
-- If the file is empty or malformed (missing required fields, unparseable structure), log a warning and proceed without patterns
+- Skip any TOML frontmatter (content between `+++` markers)
+- Extract the "Gap Audit Patterns" section: read from the `## Gap Audit Patterns` heading (inclusive) to the next H2 heading (exclusive) or end of file, whichever comes first
+- Validate the extracted section contains at least one pattern with `name` (H3 heading), `Category`, and `Trigger` fields, identified by bold label at the start of a line (`**FieldName**: value`)
+- If the section is missing, empty, or malformed (missing required fields), log a warning and proceed without patterns
 - If valid, store the patterns for inclusion in the subagent prompt
 
 If the file does not exist, proceed without patterns.
+
+If the file exists but is empty (0 bytes), log a warning and proceed without patterns.
 
 ## Section 6: Subagent Prompt Construction
 
@@ -234,14 +238,14 @@ When the spec and plan contradict each other, frame the finding as "the plan div
 When a filter cannot determine whether a finding is valid or invalid (e.g., you cannot access the codebase to verify a technical claim), pass the finding through with the evidence field prefixed: "unverified: [reason why verification was not possible] — " followed by the original evidence.
 ```
 
-**Pattern matching (if gap-patterns.md was loaded):**
+**Pattern matching (if Gap Audit Patterns section was loaded from defect catalog):**
 
 ```
 ## Pattern Matching
 
 The following recurring gap patterns have been cataloged from previous audits. When a finding matches a pattern (same category and description aligns with the trigger), add a "pattern_match" field to the finding with the canonical pattern name.
 
-<content of gap-patterns.md embedded here>
+<content of "Gap Audit Patterns" section embedded here>
 ```
 
 If no patterns were loaded, omit this section entirely.

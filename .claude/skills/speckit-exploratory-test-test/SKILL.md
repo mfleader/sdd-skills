@@ -5,6 +5,8 @@ compatibility: Requires spec-kit project structure with .specify/ directory
 metadata:
   author: github-spec-kit
   source: exploratory-test:commands/speckit.exploratory-test.test.md
+user-invocable: true
+disable-model-invocation: false
 ---
 
 # Exploratory Test Command
@@ -125,10 +127,10 @@ Store the list of changed files. If the list is empty, note that the subagent wi
 
 ## Section 6: Defect Catalog Loading
 
-Check if `defect-catalog.md` exists in the resolved spec directory.
+Check if `specs/defect-catalog.md` exists at the project level (relative to the working directory).
 
 ```bash
-if [ -f "<spec_dir>/defect-catalog.md" ]; then
+if [ -f "specs/defect-catalog.md" ]; then
   echo "DEFECT_CATALOG_FOUND=true"
 else
   echo "DEFECT_CATALOG_FOUND=false"
@@ -137,12 +139,15 @@ fi
 
 If the file exists:
 - Read its content
-- Extract the "Exploratory Testing Probes" section
-- Validate the section is non-empty (contains at least one pattern)
+- Skip any TOML frontmatter (content between `+++` markers)
+- Extract the "Exploratory Testing Probes" section: read from the `## Exploratory Testing Probes` heading (inclusive) to the next H2 heading (exclusive) or end of file, whichever comes first
+- Validate the section is non-empty (contains at least one H3 pattern heading)
 - If the section is empty or missing, log a warning and proceed without patterns
 - If valid, store the patterns for inclusion in the subagent prompt
 
 If the file does not exist, proceed without patterns.
+
+If the file exists but is empty (0 bytes), log a warning and proceed without patterns.
 
 ## Section 7: Subagent Prompt Construction
 
