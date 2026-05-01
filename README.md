@@ -118,11 +118,12 @@ sdd-skills/
 │       └── constitution.md  # Synced from specs/constitution.md
 ├── specs/
 │   ├── constitution.md      # Project governance principles
-│   ├── gap-patterns.md      # Recurring gap audit patterns
+│   ├── defect-catalog.md    # Unified defect catalog (gap-audit + exploratory test patterns)
 │   ├── 001-gap-audit-extension/
 │   ├── 002-backtrace-extension/
 │   ├── 003-backtrace-improvements/
-│   └── 004-exploratory-test-extension/
+│   ├── 004-exploratory-test-extension/
+│   └── 005-defect-catalog-unification/
 └── brainstorm/              # Brainstorm session documents
 ```
 
