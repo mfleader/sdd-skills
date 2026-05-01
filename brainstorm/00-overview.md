@@ -1,20 +1,26 @@
 # Brainstorm Overview
 
-Last updated: 2026-04-30
+Last updated: 2026-05-01
 
 ## Sessions
 
 | # | Date | Topic | Status | Spec |
 |---|------|-------|--------|------|
-| 01 | 2026-04-27 | speckit-extension-packaging | completed | specs/001-gap-audit-extension |
-| 02 | 2026-04-28 | backtrace-extension | completed | specs/002-backtrace-extension |
-| 03 | 2026-04-30 | exploratory-test-extension | spec-created | specs/004-exploratory-test-extension |
+| 01 | 2026-04-27 | speckit-extension-packaging | parked | - |
+| 02 | 2026-04-28 | backtrace-extension | spec-created | 002 |
+| 03 | 2026-04-30 | exploratory-test-extension | spec-created | 004 |
+| 04 | 2026-05-01 | defect-catalog-unification | spec-created | 005 |
 
 ## Open Threads
 
-- Backtrace cannot consume exploratory findings due to schema incompatibility (from #03)
-- Pattern catalog divergence: defect-catalog.md (per-feature) vs gap-patterns.md (project-wide) (from #03)
+- Extension name undecided for packaging approach (from #01)
+- Should `after_backtrace` hooks fire even when no additions were applied? (from #02)
+- Gap-audit `--fix` flag needs its own spec (from #02)
+- Backtrace cannot consume exploratory findings due to schema incompatibility (GapFinding vs ExploratoryFinding) (from #03, #04)
+- Pattern catalog divergence resolved by spec 005 (from #03) — thread closed
+- Should sdd-skills ship a `specs/defect-catalog.md` example/template? (from #04)
 
 ## Parked Ideas
 
-None.
+- Speckit extension packaging (#01)
+  Reason: Extension name undecided, user deferred
