@@ -52,7 +52,7 @@ Arguments arrive via `$ARGUMENTS` in the command markdown. Parsing order:
 |------|----------|--------|
 | `<spec_dir>/spec.md` | yes | Feature specification |
 | `<spec_dir>/plan.md` | yes | Implementation plan |
-| `<spec_dir>/tasks.md` | yes | Task breakdown |
+| `<spec_dir>/tasks.md` | no (degraded mode: categories 4-5 only) | Task breakdown |
 | `specs/gap-patterns.md` | no | Project-level recurring patterns |
 
 ## Output
@@ -114,7 +114,7 @@ Empty array `[]` when no findings survive filtering.
 | Invalid scope | "Invalid audit scope '[value]'. Valid values: spec, plan" |
 | spec.md not found | "Required file not found: <spec_dir>/spec.md" |
 | plan.md not found (plan scope) | "Required file not found: <spec_dir>/plan.md" |
-| tasks.md not found (plan scope) | "Required file not found: <spec_dir>/tasks.md" |
+| tasks.md not found (plan scope) | Info message: "tasks.md not found, running plan-vs-spec audit only (categories 4-5)." (not an error, continues in degraded mode) |
 | speckit version < 0.5.2 | "This extension requires speckit >= 0.5.2. Installed: [version]" |
 | Spec directory not resolved | "Could not determine spec directory. Provide path as argument or set feature.json" |
 

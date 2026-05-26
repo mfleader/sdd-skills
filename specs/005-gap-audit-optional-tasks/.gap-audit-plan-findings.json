@@ -1,0 +1,92 @@
+[
+  {
+    "classification": "blocking",
+    "category": "Contract tests",
+    "description": "No task verifies categories_audited is correctly serialized in persisted JSON. T011/T012 should explicitly check the JSON schema.",
+    "evidence": "FR-012 requires categories_audited per finding. T009 adds the field but no task reads back persisted JSON to verify.",
+    "suggested_fix": "Extend T011/T012 descriptions to include reading back the persisted JSON and asserting categories_audited content.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "blocking",
+    "category": "Contract tests",
+    "description": "No task tests the boundary where all gap-patterns are filtered out and the section must be omitted entirely.",
+    "evidence": "FR-009: 'If no patterns remain, the pattern matching section MUST be omitted entirely.' T013 covers filtering but not the zero-remaining boundary.",
+    "suggested_fix": "Add verification under T013 for the all-patterns-filtered boundary case.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "blocking",
+    "category": "Edge case coverage",
+    "description": "No task exercises the post-parse category rejection path (FR-017) where a subagent returns an out-of-category finding.",
+    "evidence": "FR-017 and Edge Cases bullet 6 describe rejection. T008 adds the logic but no task verifies it.",
+    "suggested_fix": "Note in T008 that it should verify rejection behavior as part of the implementation.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "blocking",
+    "category": "Edge case coverage",
+    "description": "No task verifies spec scope regression after Section 4 changes (FR-015).",
+    "evidence": "Edge Cases: 'When tasks.md is missing and scope is spec, behavior is unchanged.' T002 modifies Section 4 but no task confirms spec scope is unaffected.",
+    "suggested_fix": "Add a spec-scope regression check to the verification tasks.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "blocking",
+    "category": "Spec coverage gaps",
+    "description": "Plan does not detail how Filter 2's skip condition text changes in the subagent prompt.",
+    "evidence": "Current command line 209: 'Skip this filter when audit scope is spec.' FR-008 requires changing to 'when tasks.md is not an input artifact.' T007 covers this but plan lacks design detail.",
+    "suggested_fix": "T007 description already specifies the change. No plan update needed — task description is sufficient.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Integration gaps",
+    "description": "No task documents the backtrace incompatibility or creates a follow-up issue.",
+    "evidence": "Assumptions note backtrace limitation. No task creates follow-up or documents it in README.",
+    "suggested_fix": "Add documentation of the backtrace limitation to T017 (README update).",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Integration gaps",
+    "description": "T018 (SKILL.md update) lacks explicit acceptance criterion for degraded mode description.",
+    "evidence": "SKILL.md says 'plan (spec.md + plan.md + tasks.md)'. T018 should specify the new wording.",
+    "suggested_fix": "Add explicit wording to T018: 'plan (spec.md + plan.md, optionally tasks.md)'.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "T009 must handle spec scope persistence (categories_audited for all 7 categories) but this is not explicitly stated.",
+    "evidence": "FR-012 specifies categories_audited for spec mode. T009 description says 'FR-012, FR-013' but does not mention spec scope explicitly.",
+    "suggested_fix": "T009 already references FR-012 which lists all three modes. Explicit note would be clearer.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "Plan does not specify how tasks.md presence propagates from Section 4 to downstream sections in LLM prose.",
+    "evidence": "Plan D3: 'Surgical edits to specific sections.' No state propagation mechanism specified.",
+    "suggested_fix": "Add a note to the plan or T002 that Section 4 should establish a clear state indicator for downstream sections.",
+    "source": "audit",
+    "scope": "plan"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Spec coverage gaps",
+    "description": "No explicit spec-scope regression task despite FR-015.",
+    "evidence": "FR-015: 'When scope is spec, all existing behavior MUST remain unchanged.' No task covers this.",
+    "suggested_fix": "Addressed by the edge case coverage finding above (add spec-scope regression check).",
+    "source": "audit",
+    "scope": "plan"
+  }
+]

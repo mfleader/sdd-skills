@@ -25,11 +25,11 @@ A skill author has written a spec for a new SDD skill and wants to catch specifi
 
 ### User Story 2 - Audit Plan and Tasks for Gaps (Priority: P1)
 
-A skill author has completed the spec, plan, and tasks phases and wants to verify that the plan and tasks adequately cover the spec before implementation. They invoke the gap audit command with `plan` focus. The auditor reads `spec.md`, `plan.md`, and `tasks.md`, dispatches an adversarial subagent, applies false positive filters, and presents the findings.
+A skill author has completed the spec and plan phases (and optionally the tasks phase) and wants to verify that the plan adequately covers the spec before implementation. They invoke the gap audit command with `plan` focus. The auditor reads `spec.md` and `plan.md` (and `tasks.md` if present), dispatches an adversarial subagent, applies false positive filters, and presents the findings. When tasks.md is absent, only categories 4-5 (implicit behavior, spec coverage gaps) are audited.
 
-**Why this priority**: Plan-level auditing catches integration gaps, missing contract tests, and spec coverage gaps that would otherwise surface during implementation or code review.
+**Why this priority**: Plan-level auditing catches integration gaps, missing contract tests, and spec coverage gaps that would otherwise surface during implementation or code review. When run before task generation, it catches architectural gaps early.
 
-**Independent Test**: Can be fully tested by creating a spec with edge cases and a plan/tasks set that deliberately omits a contract test and an integration scenario. Confirm the auditor identifies the missing coverage.
+**Independent Test**: Can be tested by creating a spec with edge cases and a plan/tasks set that deliberately omits a contract test and an integration scenario. Confirm the auditor identifies the missing coverage. Also test with plan+spec only (no tasks.md) to verify degraded mode produces findings in categories 4-5 only.
 
 **Acceptance Scenarios**:
 
@@ -38,6 +38,7 @@ A skill author has completed the spec, plan, and tasks phases and wants to verif
 3. **Given** a spec directory where all spec requirements are fully covered by plan steps and tasks, **When** the user invokes the gap audit command with focus `plan`, **Then** the auditor reports no issues found.
 4. **Given** a spec directory where two components interact but no contract test exists at their API boundary, **When** the user invokes the gap audit command with focus `plan`, **Then** the auditor reports a "contract tests" finding citing the boundary and the missing argument/contract verification.
 5. **Given** a spec directory where a scenario requires real components but no task covers integration testing for it, **When** the user invokes the gap audit command with focus `plan`, **Then** the auditor reports an "integration gaps" finding citing the scenario and the missing coverage.
+6. **Given** a spec directory containing `spec.md` and `plan.md` but no `tasks.md`, **When** the user invokes the gap audit command with focus `plan`, **Then** the auditor emits an info message about degraded mode, audits categories 4-5 only, and the summary indicates a partial audit.
 
 ---
 
@@ -94,7 +95,8 @@ A skill author wants to save the audit findings for later reference or automated
 
 - When `spec.md` does not exist in the provided directory, the command returns an error naming the missing file (covered by FR-013).
 - When the user provides an invalid focus parameter (neither `spec` nor `plan`), the command returns an error listing the valid values (covered by FR-019).
-- When `plan.md` or `tasks.md` is missing but focus is `plan`, the command returns an error naming each missing file (covered by FR-013).
+- When `plan.md` is missing but focus is `plan`, the command returns an error naming the missing file (covered by FR-013).
+- When `tasks.md` is missing but focus is `plan`, the command emits an info message and runs in degraded mode (categories 4-5 only). This is not an error.
 - When `gap-patterns.md` exists but is empty or malformed, the command treats it as no patterns and proceeds without pattern matching.
 - When the subagent returns no findings at all, the command reports no issues found.
 - When the subagent returns findings that all fail false positive filters, the command reports no issues found.
@@ -106,7 +108,7 @@ A skill author wants to save the audit findings for later reference or automated
 
 - **FR-001**: The command MUST accept a focus parameter with two valid values: `spec` and `plan`.
 - **FR-002**: When focus is `spec`, the command MUST read `spec.md` from the spec directory and audit it against the spec checklist (orphan FRs, weak ACs, unverifiable SCs, cross-reference gaps, implicit assumptions, naming collisions, implicit behavior).
-- **FR-003**: When focus is `plan`, the command MUST read `spec.md`, `plan.md`, and `tasks.md` from the spec directory and audit them against the plan checklist (contract tests, integration gaps, edge case coverage, implicit behavior, spec coverage gaps).
+- **FR-003**: When focus is `plan`, the command MUST read `spec.md` and `plan.md` from the spec directory. If `tasks.md` exists, the command MUST also read it. When `tasks.md` is present, audit against all 5 plan checklist categories (contract tests, integration gaps, edge case coverage, implicit behavior, spec coverage gaps). When absent, audit against categories 4 (implicit behavior) and 5 (spec coverage gaps) only.
 - **FR-004**: The command MUST dispatch an adversarial auditor subagent using the `superpowers:code-reviewer` subagent type with the full checklist, classification scheme, and output constraints embedded in the prompt.
 - **FR-005**: The subagent MUST NOT modify any files.
 - **FR-006**: The command MUST apply 8 false positive filters to raw subagent findings before reporting: (1) verify technical claims against actual APIs, (2) cross-reference tasks before claiming gaps, (3) distinguish FRs from acceptance scenarios, (4) don't group findings with different root causes, (5) classify pre-existing behavior correctly, (6) accept human-verified criteria, (7) acknowledge existing coverage before claiming gaps, (8) default to "plan diverges from spec" framing.
@@ -116,7 +118,7 @@ A skill author wants to save the audit findings for later reference or automated
 - **FR-010**: The command MUST optionally load `specs/gap-patterns.md` (project-level) if it exists and include its patterns in the subagent prompt.
 - **FR-011**: The command MUST present findings to the user grouped by blocking/non-blocking classification.
 - **FR-012**: Superseded by FR-024 (explicit resolution order).
-- **FR-013**: The command MUST return an error if the required artifact files do not exist for the selected focus.
+- **FR-013**: The command MUST return an error if the required artifact files do not exist for the selected focus. For plan scope, required files are `spec.md` and `plan.md`. `tasks.md` is optional (triggers degraded mode when absent).
 - **FR-014**: When `--output` is set and a findings JSON file already exists from a previous run, the command MUST overwrite it.
 - **FR-015**: The extension MUST be packaged as a speckit extension with `extension.yml`, a `commands/` directory, and no lifecycle hooks.
 - **FR-016**: The extension MUST declare a minimum speckit version requirement of >= 0.5.2.
@@ -132,9 +134,9 @@ A skill author wants to save the audit findings for later reference or automated
 
 ### Key Entities
 
-- **GapFinding**: A single gap identified by the auditor. Contains classification, category, description, evidence, suggested_fix, and optionally pattern_match. Named GapFinding to distinguish from spex-deep-review's Finding entity, which uses a different schema (severity/confidence instead of blocking/non-blocking classification).
+- **GapFinding**: A single gap identified by the auditor. Contains classification, category, description, evidence, suggested_fix, optionally pattern_match, and categories_audited (string array, required on persist, lists active checklist categories for the audit run). Named GapFinding to distinguish from spex-deep-review's Finding entity, which uses a different schema (severity/confidence instead of blocking/non-blocking classification).
 - **False Positive Filter**: A validation check applied to raw subagent findings to remove false positives and improve precision. There are 8 named filters.
-- **Audit Scope**: The scope selector. Either `spec` (spec artifacts only) or `plan` (spec + plan + tasks artifacts).
+- **Audit Scope**: The scope selector. `spec` audits spec artifacts only. `plan` audits spec + plan artifacts (required), plus tasks artifacts when available. When tasks.md is absent in plan scope, only categories 4-5 are audited (degraded mode).
 - **Spec Checklist**: The 7-item checklist used for spec-focus auditing (orphan FRs, weak ACs, unverifiable SCs, cross-reference gaps, implicit assumptions, naming collisions, implicit behavior).
 - **Plan Checklist**: The 5-item checklist used for plan-focus auditing (contract tests, integration gaps, edge case coverage, implicit behavior, spec coverage gaps).
 
@@ -154,7 +156,7 @@ A skill author wants to save the audit findings for later reference or automated
 ## Assumptions
 
 - The user has a speckit project initialized with at least version 0.5.2.
-- Spec, plan, and task artifacts follow the standard speckit template structure and naming conventions (`spec.md`, `plan.md`, `tasks.md`).
+- Spec and plan artifacts follow the standard speckit template structure and naming conventions (`spec.md`, `plan.md`). tasks.md is optional for plan scope; when absent, the audit runs in degraded mode covering categories 4-5 only.
 - The `superpowers:code-reviewer` subagent type is available in the user's Claude Code environment. This type is used instead of `general-purpose` because it loads the code-reviewer skill instructions, which provide structured review discipline (checklist adherence, evidence requirements, classification rigor) that a general-purpose agent does not have by default.
 - `gap-patterns.md` is a project-level file (in the `specs/` directory, not per-feature) that catalogs gap types that have recurred across 2+ previous audits. Its purpose is to help the auditor recognize repeat offenders. Each pattern entry has three fields: a canonical name (e.g., `missing-condition-false-path`), the checklist category it applies to (e.g., `Weak ACs`), and a trigger description explaining what to look for. Pattern matching is category-based: a finding matches a pattern when the finding's category matches the pattern's category and the finding's description aligns with the pattern's trigger condition.
 - The extension will be distributed as a git repository installable via speckit's extension mechanism.

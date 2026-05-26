@@ -16,10 +16,11 @@ A single gap identified by the adversarial auditor subagent, after false positiv
 | source | string | yes (on persist) | Origin of the finding (e.g., `"audit"`). Added when `--output` persists findings to JSON. Not present in subagent output. |
 | scope | string | yes (on persist) | Audit scope that produced the finding: `"spec"` or `"plan"`. Added when `--output` persists findings to JSON. |
 | pattern_match | string | no | Canonical name from `gap-patterns.md` when the finding matches a known recurring pattern |
+| categories_audited | string[] | yes (on persist) | Checklist categories active in the audit run, in checklist order. Added when `--output` persists findings to JSON. |
 
 **Validation rules**:
 - `classification` MUST be one of: `"blocking"`, `"non-blocking"`
-- `category` MUST be one of the 12 checklist categories (7 spec + 5 plan, depending on audit scope)
+- `category` MUST be one of the active checklist categories for the audit run (7 for spec, 5 for plan with tasks.md, 2 for plan without tasks.md)
 - `evidence` MUST NOT be empty
 - `pattern_match` is only present when `gap-patterns.md` exists and a match is found
 

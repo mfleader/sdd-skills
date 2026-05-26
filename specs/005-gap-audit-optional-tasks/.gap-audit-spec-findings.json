@@ -1,0 +1,105 @@
+[
+  {
+    "classification": "blocking",
+    "category": "Orphan FRs",
+    "description": "Edge Case bullet 6 describes host-side category validation (rejecting findings with out-of-scope categories), but no FR requires this post-response validation. FR-007 only addresses the subagent prompt directive.",
+    "evidence": "Edge Cases bullet 6: 'the finding is rejected during category validation.' FR-007 only addresses the subagent prompt directive, not post-response validation.",
+    "suggested_fix": "Add FR-017: 'After parsing subagent findings, the command MUST reject any finding whose category does not match an active checklist category. Rejected findings MUST be excluded from output and persistence.'",
+    "source": "audit",
+    "scope": "spec",
+    "pattern_match": "missing-derived-fr"
+  },
+  {
+    "classification": "blocking",
+    "category": "Orphan FRs",
+    "description": "FR-009 covers filtering patterns to active categories but does not specify behavior when all patterns are filtered out (omit section entirely vs include empty section). Edge Case bullet 5 describes this but has no backing FR.",
+    "evidence": "Edge Cases bullet 5: 'the pattern matching section is omitted entirely from the subagent prompt.' FR-009 does not specify this case.",
+    "suggested_fix": "Amend FR-009 to add: 'If after filtering no applicable patterns remain, the pattern matching section MUST be omitted entirely from the subagent prompt.'",
+    "source": "audit",
+    "scope": "spec",
+    "pattern_match": "missing-derived-fr"
+  },
+  {
+    "classification": "blocking",
+    "category": "Weak ACs",
+    "description": "FR-012 lists exact category names for degraded mode but says only 'all 5 plan categories' and 'all 7 spec categories' for full/spec modes without listing them. An implementation could use incorrect names and pass the AC.",
+    "evidence": "FR-012: 'For full plan mode: all 5 plan categories. For spec mode: all 7 spec categories.' Exact names not listed.",
+    "suggested_fix": "Amend FR-012 to list exact arrays: full plan: [\"Contract tests\", \"Integration gaps\", \"Edge case coverage\", \"Implicit behavior\", \"Spec coverage gaps\"], spec: [\"Orphan FRs\", \"Weak ACs\", \"Unverifiable SCs\", \"Cross-reference gaps\", \"Implicit assumptions\", \"Naming collisions\", \"Implicit behavior\"].",
+    "source": "audit",
+    "scope": "spec",
+    "pattern_match": "missing-condition-false-path"
+  },
+  {
+    "classification": "blocking",
+    "category": "Cross-reference gaps",
+    "description": "FR-016 (version bump) has no corresponding SC. No SC verifies the extension version was bumped.",
+    "evidence": "FR-016 requires version bump. SC-001 through SC-007 cover runtime behavior only.",
+    "suggested_fix": "Add SC-008: 'The extension.yml version is higher than the pre-change version, verified by comparing versions.'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "blocking",
+    "category": "Implicit behavior",
+    "description": "No FR specifies the clean output text for degraded mode. US1 AC-3 makes a design choice (no qualifier when clean) not backed by an FR.",
+    "evidence": "US1 AC-3: 'output reads \"No issues found.\"' No FR addresses clean output for degraded mode. FR-010 only covers findings-present case.",
+    "suggested_fix": "Add FR-018: 'When scope is plan, tasks.md is absent, and no findings exist, the output MUST read \"No issues found.\"'",
+    "source": "audit",
+    "scope": "spec",
+    "pattern_match": "missing-condition-false-path"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Weak ACs",
+    "description": "US1 AC-1 does not constrain when the info message appears relative to the audit. FR-004 does not specify timing.",
+    "evidence": "US1 AC-1 and FR-004 specify message content but not timing (before vs after subagent dispatch).",
+    "suggested_fix": "Amend FR-004: 'the command MUST emit an info message to the user before dispatching the subagent.'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Unverifiable SCs",
+    "description": "SC-001 requires 'identical findings' but the auditor is an LLM subagent with non-deterministic output. Two runs will not produce identical findings.",
+    "evidence": "SC-001: 'produces identical findings to the current implementation, measured by running the same audit on the same artifacts and comparing output.'",
+    "suggested_fix": "Reframe SC-001 to verify structural backward compatibility: 'uses the same 5-category checklist, prompt structure, and filter logic as the current implementation.'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Cross-reference gaps",
+    "description": "FR-014 and FR-015 (unchanged behavior) have no corresponding SCs for regression verification.",
+    "evidence": "FR-014 and FR-015 describe backward-compatible behavior with no mapping to any SC.",
+    "suggested_fix": "Consider adding regression SCs for these FRs.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit assumptions",
+    "description": "The spec assumes adding categories_audited per-finding is backward compatible but does not state this assumption explicitly.",
+    "evidence": "FR-012/FR-013 add a new field. Assumptions discuss JSON array format compatibility but not per-finding field additions.",
+    "suggested_fix": "Add to Assumptions: 'Adding new fields to GapFinding objects is backward-compatible because downstream consumers ignore unknown fields.'",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit assumptions",
+    "description": "FR-008 changes filter 2 skip condition from scope-string check to artifact-load-state check. These are logically equivalent for spec scope but the difference is not noted.",
+    "evidence": "FR-008 changes condition from 'when audit scope is spec' to 'when tasks.md is not an input artifact.'",
+    "suggested_fix": "Add a note to FR-008 clarifying logical equivalence for spec scope.",
+    "source": "audit",
+    "scope": "spec"
+  },
+  {
+    "classification": "non-blocking",
+    "category": "Implicit behavior",
+    "description": "The spec does not specify ordering of the categories_audited array.",
+    "evidence": "FR-012 says 'listing the checklist categories' but no ordering requirement.",
+    "suggested_fix": "Amend FR-012 to specify checklist order (category number order).",
+    "source": "audit",
+    "scope": "spec"
+  }
+]
