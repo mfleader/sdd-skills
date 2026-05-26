@@ -38,7 +38,7 @@ This repo provides three extensions:
 
 | Extension | Description | Command |
 |-----------|-------------|---------|
-| **gap-audit** | Adversarial gap auditor for specs and plans | `/speckit.gap-audit.audit` |
+| **gap-audit** | Adversarial gap auditor for specs and plans (tasks optional for plan scope) | `/speckit.gap-audit.audit` |
 | **backtrace** | Trace findings back to spec gaps and propose additions | `/speckit.backtrace.trace` |
 | **exploratory-test** | Adversarial tester that exercises implementations beyond success criteria | `/speckit.exploratory-test.test` |
 
