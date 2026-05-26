@@ -68,20 +68,25 @@ Read `<spec_dir>/spec.md` and store its full content.
 
 ### Plan scope
 
-Check that ALL of these files exist:
+Check that these required files exist:
 - `<spec_dir>/spec.md`
 - `<spec_dir>/plan.md`
-- `<spec_dir>/tasks.md`
 
-For each missing file, report:
+For each missing required file, report:
 
 ```
 Required file not found: <spec_dir>/<filename>
 ```
 
-If any files are missing, stop. Do not proceed to subsequent sections.
+If any required files are missing, stop. Do not proceed to subsequent sections.
 
-Read all three files and store their full content.
+Check whether `<spec_dir>/tasks.md` exists:
+- If `tasks.md` exists: set TASKS_LOADED=true.
+- If `tasks.md` does not exist: emit an info message to the user: "tasks.md not found, running plan-vs-spec audit only (categories 4-5)." Set TASKS_LOADED=false. Continue without stopping.
+
+Read `spec.md` and `plan.md` and store their full content. If TASKS_LOADED is true, also read and store the full content of `tasks.md`.
+
+Downstream sections (6, 8, 9, 10) reference TASKS_LOADED to determine full vs degraded plan mode behavior.
 
 ## Section 5: Gap-Patterns Loading
 
@@ -183,7 +188,7 @@ Return your findings as a JSON array. Each element MUST have these fields:
 
 {
   "classification": "blocking" or "non-blocking",
-  "category": "<one of the 7 checklist categories>",
+  "category": "<one of the active checklist categories>",
   "description": "<what the gap is>",
   "evidence": "<file reference, section, or quote from the artifact>",
   "suggested_fix": "<what to add or change to close the gap>"
@@ -205,7 +210,7 @@ Before including a finding in your output, apply ALL of the following filters. I
 If your finding makes a claim about an API, function, or codebase behavior, verify it by using grep or reading the actual code. If the claim is wrong (the API does exist, the function does handle the case), reject the finding.
 
 ### Filter 2: Cross-reference tasks
-If your finding claims "no task covers X", check tasks.md (if available) before including the finding. If a task already covers the claimed gap, reject the finding. NOTE: Skip this filter when audit scope is spec (tasks.md is not an input artifact for spec scope).
+If your finding claims "no task covers X", check tasks.md (if available) before including the finding. If a task already covers the claimed gap, reject the finding. NOTE: Skip this filter when tasks.md is not an input artifact (spec scope, or plan scope when tasks.md was not loaded).
 
 ### Filter 3: Distinguish FRs from acceptance scenarios
 Do not report an acceptance scenario as a "missing FR." ACs describe testing conditions, not requirements. If what you found is actually an acceptance scenario that should be added to an existing FR, reframe the finding accordingly (e.g., "FR-003 should have an AC for the condition-false path" rather than "missing FR for condition-false behavior").
@@ -246,11 +251,15 @@ The following recurring gap patterns have been cataloged from previous audits. W
 
 If no patterns were loaded, omit this section entirely.
 
+**Plan scope pattern filtering**: When audit scope is `plan`, filter the loaded patterns to only those whose `category` matches one of the active plan checklist categories (determined by TASKS_LOADED). Patterns for inactive categories MUST be excluded. If after filtering no applicable patterns remain, omit the pattern matching section entirely from the subagent prompt.
+
 ### Plan scope prompt
 
-Use the same structure as the spec scope prompt with these differences:
+Use the same structure as the spec scope prompt with these differences (conditioned on TASKS_LOADED from Section 4):
 
-1. **Artifacts**: Include spec.md, plan.md, AND tasks.md content
+1. **Artifacts**: Include spec.md and plan.md content. Include tasks.md content ONLY if TASKS_LOADED is true.
+
+**When TASKS_LOADED is true:**
 
 ```
 ## Artifact: spec.md
@@ -272,7 +281,25 @@ Use the same structure as the spec scope prompt with these differences:
 </artifact>
 ```
 
-2. **Checklist**: Replace the 7-item spec checklist with the 5-item plan checklist:
+**When TASKS_LOADED is false:**
+
+```
+## Artifact: spec.md
+
+<artifact name="spec.md">
+<full content of spec.md>
+</artifact>
+
+## Artifact: plan.md
+
+<artifact name="plan.md">
+<full content of plan.md>
+</artifact>
+```
+
+2. **Checklist**: Replace the 7-item spec checklist with the plan checklist. The checklist content depends on TASKS_LOADED.
+
+**When TASKS_LOADED is true (full mode, 5 categories):**
 
 ```
 ## Audit Checklist
@@ -295,9 +322,23 @@ Undocumented interactions between components in the plan. If two components in t
 FRs, ACs, or SCs that imply architectural choices the plan does not account for. For each spec requirement, verify the plan addresses it. If an FR implies a specific architectural pattern (e.g., retry logic, caching, event ordering) but the plan does not account for it, that is a spec coverage gap.
 ```
 
-3. **Filter 2 adjustment**: The cross-reference tasks filter IS active for plan scope (tasks.md is an input artifact).
+**When TASKS_LOADED is false (degraded mode, 2 categories):**
 
-4. **Category validation**: The `category` field in findings MUST be one of the 5 plan checklist categories.
+```
+## Audit Checklist
+
+Check the plan against the spec using these 2 categories. For each category, look for the described gap type and report any findings.
+
+### 1. Implicit behavior
+Undocumented interactions between components in the plan. If two components in the plan interact in ways the spec does not describe, or if the plan assumes ordering or timing guarantees the spec does not establish, that is implicit behavior.
+
+### 2. Spec coverage gaps
+FRs, ACs, or SCs that imply architectural choices the plan does not account for. For each spec requirement, verify the plan addresses it. If an FR implies a specific architectural pattern (e.g., retry logic, caching, event ordering) but the plan does not account for it, that is a spec coverage gap.
+```
+
+3. **Filter 2 adjustment**: The cross-reference tasks filter IS active when TASKS_LOADED is true (tasks.md is an input artifact). When TASKS_LOADED is false, skip Filter 2 (same as spec scope).
+
+4. **Category validation**: The `category` field in findings MUST be one of the active plan checklist categories. When TASKS_LOADED is true, valid categories are all 5 plan checklist categories. When TASKS_LOADED is false, valid categories are "Implicit behavior" and "Spec coverage gaps" only.
 
 All other sections (preamble, classification, output format, false positive filters 1 and 3-8, unverified handling, pattern matching) remain the same.
 
@@ -335,6 +376,18 @@ The subagent returned prose instead of JSON. Attempt to extract a JSON array: lo
 ### Malformed JSON
 The subagent returned something that looks like JSON but fails to parse. Set PARSE_FAILED=true, log a warning ("Subagent returned malformed JSON."), and treat as empty array.
 
+### Category validation
+
+After successfully parsing the findings array, validate each finding's `category` field against the active checklist categories for the current audit run:
+
+- **Spec scope**: valid categories are the 7 spec checklist categories.
+- **Plan scope, TASKS_LOADED=true**: valid categories are the 5 plan checklist categories.
+- **Plan scope, TASKS_LOADED=false**: valid categories are "Implicit behavior" and "Spec coverage gaps" only.
+
+For each finding whose `category` does not match one of the active categories, exclude it from the findings array and log: "Warning: Rejected finding with out-of-scope category '[category]'. Active categories: [list]."
+
+Proceed with the filtered findings array to Section 9.
+
 ## Section 9: JSON Persistence
 
 If the `--output` flag was set:
@@ -342,7 +395,14 @@ If the `--output` flag was set:
 1. Determine the output file path:
    - Spec scope: `<spec_dir>/.gap-audit-spec-findings.json`
    - Plan scope: `<spec_dir>/.gap-audit-plan-findings.json`
-2. Before writing, add `"source": "audit"` and `"scope": "<scope>"` (where `<scope>` is `spec` or `plan`) to each finding object in the array. These fields enable downstream tools (backtrace, pattern collector) to identify the origin and scope of findings without relying on filenames.
+2. Before writing, add the following fields to each finding object in the array:
+   - `"source": "audit"` — identifies the origin of the finding.
+   - `"scope": "<scope>"` (where `<scope>` is `spec` or `plan`) — identifies the audit scope.
+   - `"categories_audited"` — a string array listing the checklist categories that were active in the audit run, in checklist order. Use the exact arrays for each mode:
+     - Spec scope: `["Orphan FRs", "Weak ACs", "Unverifiable SCs", "Cross-reference gaps", "Implicit assumptions", "Naming collisions", "Implicit behavior"]`
+     - Plan scope, TASKS_LOADED=true: `["Contract tests", "Integration gaps", "Edge case coverage", "Implicit behavior", "Spec coverage gaps"]`
+     - Plan scope, TASKS_LOADED=false: `["Implicit behavior", "Spec coverage gaps"]`
+   These fields enable downstream tools (backtrace, pattern collector) to identify the origin, scope, and coverage of findings without relying on filenames.
 3. Write the findings array (parsed JSON from Section 8, with source/scope fields added) to the file
 4. If the file already exists, overwrite it
 5. Write an empty array `[]` when no findings survived filtering
@@ -383,6 +443,8 @@ Present findings to the user grouped by classification (blocking first, then non
 Summary: N blocking, M non-blocking findings.
 ```
 
+**Plan scope summary adjustment**: When audit scope is `plan` and TASKS_LOADED is false, the summary line MUST read: "N blocking, M non-blocking findings (categories 4-5 only, tasks.md not available)." When TASKS_LOADED is true, the summary line is unchanged: "N blocking, M non-blocking findings."
+
 If a finding has a `pattern_match` field, include it: `- **Pattern**: [pattern_match]`
 
 ### When no findings survive filtering:
@@ -393,7 +455,7 @@ If PARSE_FAILED was set in Section 8 (subagent returned non-JSON or malformed re
 Audit completed but the subagent did not return structured findings. Re-run the audit or review the subagent output manually.
 ```
 
-If parsing succeeded and findings array is genuinely empty:
+If parsing succeeded and findings array is genuinely empty (all scopes):
 
 ```
 No issues found.

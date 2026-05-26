@@ -31,13 +31,15 @@ specify extension add gap-audit --dev
 
 Reads `spec.md` and checks for: orphan FRs, weak ACs, unverifiable SCs, cross-reference gaps, implicit assumptions, naming collisions, and implicit behavior.
 
-### Audit plan and tasks for gaps
+### Audit plan for gaps
 
 ```
 /speckit.gap-audit.audit plan
 ```
 
-Reads `spec.md`, `plan.md`, and `tasks.md` and checks for: missing contract tests, integration gaps, edge case coverage gaps, implicit behavior, and spec coverage gaps.
+Reads `spec.md` and `plan.md` (required), plus `tasks.md` if present. When `tasks.md` is available, checks all 5 categories: missing contract tests, integration gaps, edge case coverage gaps, implicit behavior, and spec coverage gaps. When `tasks.md` is absent, checks categories 4-5 only (implicit behavior, spec coverage gaps).
+
+**Note**: The backtrace extension's plan scope still requires `tasks.md`. If you run gap-audit plan without `tasks.md` and get findings, use `backtrace spec` (not `backtrace plan`) to trace them, or generate `tasks.md` first.
 
 ### Save findings to JSON
 
@@ -46,7 +48,7 @@ Reads `spec.md`, `plan.md`, and `tasks.md` and checks for: missing contract test
 /speckit.gap-audit.audit plan --output
 ```
 
-Writes findings to `.gap-audit-spec-findings.json` or `.gap-audit-plan-findings.json` in the spec directory. Each finding includes `source` and `scope` fields. Overwrites any existing file from a previous run.
+Writes findings to `.gap-audit-spec-findings.json` or `.gap-audit-plan-findings.json` in the spec directory. Each finding includes `source`, `scope`, and `categories_audited` fields. Overwrites any existing file from a previous run.
 
 ## Gap Patterns
 

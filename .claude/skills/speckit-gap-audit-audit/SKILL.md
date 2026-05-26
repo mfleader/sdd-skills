@@ -13,7 +13,7 @@ disable-model-invocation: false
 
 ## Overview
 
-Dispatches an adversarial auditor subagent to find gaps the standard review step missed in SDD artifacts. Supports two audit scopes: `spec` (spec.md only) and `plan` (spec.md + plan.md + tasks.md).
+Dispatches an adversarial auditor subagent to find gaps the standard review step missed in SDD artifacts. Supports two audit scopes: `spec` (spec.md only) and `plan` (spec.md + plan.md, optionally tasks.md). When tasks.md is absent in plan scope, audits categories 4-5 only (implicit behavior, spec coverage gaps).
 
 ## Usage
 
