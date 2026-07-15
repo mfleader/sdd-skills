@@ -77,7 +77,7 @@ When `--output` is passed, findings conform to the schema in `contracts/explorat
 
 ## Defect Catalog Integration
 
-Create a `defect-catalog.md` file in the spec directory (adjacent to `spec.md`) with an "Exploratory Testing Probes" section to track recurring defect patterns. When present, the tester uses these as additional test vectors and tags matching findings with `"pattern_match"`.
+Commit a `defect-catalog.md` file at `specs/defect-catalog.md` (project-level, resolved from the git repository root) with an "Exploratory Testing Probes" section to track recurring defect patterns. When present, the tester uses these as additional test vectors and tags matching findings with `"pattern_match"`.
 
 Format:
 

@@ -120,24 +120,29 @@ Store the list of changed files. If the list is empty, note that the subagent wi
 
 ## Section 6: Defect Catalog Loading
 
-Check if `defect-catalog.md` exists in the resolved spec directory.
+Resolve the defect catalog path from the git repository root (not relative to the current working directory). The catalog is a project-level artifact at `specs/defect-catalog.md`. `git rev-parse --show-toplevel` returns the worktree root in a linked worktree, which is correct.
 
 ```bash
-if [ -f "<spec_dir>/defect-catalog.md" ]; then
+REPO_ROOT=$(git rev-parse --show-toplevel)
+if [ -f "$REPO_ROOT/specs/defect-catalog.md" ]; then
   echo "DEFECT_CATALOG_FOUND=true"
 else
   echo "DEFECT_CATALOG_FOUND=false"
 fi
 ```
 
-If the file exists:
+All reads of the catalog in this section use `$REPO_ROOT/specs/defect-catalog.md`.
+
+If the file does not exist, set `CATALOG_DEGRADED_REASON` to `catalog file not found at $REPO_ROOT/specs/defect-catalog.md` and proceed without patterns.
+
+If the file exists but is 0 bytes, set `CATALOG_DEGRADED_REASON` to `catalog file is empty (0 bytes)` and proceed without patterns.
+
+If the file exists and is non-empty:
 - Read its content
 - Extract the "Exploratory Testing Probes" section
 - Validate the section is non-empty (contains at least one pattern)
-- If the section is empty or missing, log a warning and proceed without patterns
-- If valid, store the patterns for inclusion in the subagent prompt
-
-If the file does not exist, proceed without patterns.
+- If the section is empty or missing, set `CATALOG_DEGRADED_REASON` to `Exploratory Testing Probes section missing or empty` and proceed without patterns
+- If valid, store the patterns for inclusion in the subagent prompt (do not set `CATALOG_DEGRADED_REASON`)
 
 ## Section 7: Subagent Prompt Construction
 
@@ -372,6 +377,15 @@ Do not delete the file on validation failure.
 If `--output` was NOT set, skip this section entirely. Do NOT write a findings file.
 
 ## Section 12: Output Formatting
+
+**Catalog absence warning:** If `CATALOG_DEGRADED_REASON` was set in Section 6, emit the following line before any findings output:
+
+```
+WARNING: this exploratory run executed WITHOUT the defect catalog: <CATALOG_DEGRADED_REASON>.
+Findings below did not benefit from the project's known-defect patterns.
+```
+
+When the catalog loaded successfully, no extra output is needed.
 
 Present findings to the user grouped by severity (critical first, then important, moderate, minor).
 
