@@ -346,11 +346,11 @@ All other sections (preamble, classification, output format, false positive filt
 
 Dispatch a single subagent using the Agent tool with:
 
-- `subagent_type`: `superpowers:code-reviewer`
+- `subagent_type`: `superpowers:code-reviewer` if that agent type is available; if the dispatch fails with an unknown-agent-type error, re-dispatch the SAME prompt once with `subagent_type: general-purpose`. The `superpowers:code-reviewer` type is plugin-provided and not guaranteed present; `general-purpose` is always available.
 - `description`: `Adversarial gap audit (<scope>)` where `<scope>` is `spec` or `plan`
 - `prompt`: The full prompt constructed in Section 6
 
-This MUST be a single dispatch. Do NOT iterate or perform multi-round refinement.
+This MUST be a single dispatch (with one fallback retry on unknown-agent-type). Do NOT iterate or perform multi-round refinement.
 
 **Post-dispatch verification**: After the subagent returns, verify no files were modified during the audit:
 

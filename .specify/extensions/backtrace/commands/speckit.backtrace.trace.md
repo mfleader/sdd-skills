@@ -217,9 +217,9 @@ This is a one-pass operation. No iteration or looping.
 Dispatch a single adversarial auditor subagent to review all proposed additions.
 
 **Subagent configuration:**
-- `subagent_type`: `superpowers:code-reviewer`
+- `subagent_type`: `superpowers:code-reviewer` if that agent type is available; if the dispatch fails with an unknown-agent-type error, re-dispatch the SAME prompt once with `subagent_type: general-purpose`. The `superpowers:code-reviewer` type is plugin-provided and not guaranteed present; `general-purpose` is always available.
 - `description`: `Backtrace auditor review (<scope>)`
-- Single dispatch (all proposed additions in one prompt)
+- Single dispatch (with one fallback retry on unknown-agent-type; all proposed additions in one prompt)
 
 **Construct the auditor prompt with these components:**
 
