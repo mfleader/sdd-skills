@@ -5,7 +5,7 @@ Traces gap-audit findings back to missing spec items, proposes additions with ad
 ## Requirements
 
 - speckit >= 0.5.2
-- Claude Code with `superpowers:code-reviewer` subagent type
+- Claude Code with `superpowers:code-reviewer` subagent type (falls back to `general-purpose` when unavailable)
 - Findings in GapFinding or ExploratoryFinding JSON format (from `gap-audit --output`, `exploratory-test --output`, or manual creation)
 
 ## Installation
@@ -40,6 +40,14 @@ Auto-detects findings files (e.g., `.gap-audit-spec-findings.json`) in the spec 
 
 Auto-detects findings files (e.g., `.gap-audit-plan-findings.json`). Traces against spec.md, plan.md, and tasks.md. May propose new tasks in addition to spec additions.
 
+### Persist findings to disk
+
+```
+/speckit.backtrace.trace spec --output
+```
+
+Writes `<spec_dir>/.backtrace-findings.json` after auditor review, before applying additions. The file records all proposed additions and their verdicts (including rejections). When all proposals are rejected, each rejected proposal still produces an entry with `verdict: "reject"`. Not written when no findings exist to trace.
+
 ### Explicit spec directory
 
 ```
@@ -47,6 +55,12 @@ Auto-detects findings files (e.g., `.gap-audit-plan-findings.json`). Traces agai
 ```
 
 Overrides the default spec directory resolution (feature.json or interactive prompt).
+
+Flags and spec directory can be combined:
+
+```
+/speckit.backtrace.trace plan specs/002-my-feature --output
+```
 
 ## Findings Input Format
 
@@ -85,9 +99,26 @@ Backtrace auto-detects the findings schema from the `source` field on the first 
 
 Exploratory findings are normalized to GapFinding shape at parse time (severity → classification, reproduction+expected+actual → evidence, spec_gap → suggested_fix, category inferred from content).
 
-If no `*-findings.json` file matching the current scope is found, backtrace prompts for a file path. Legacy filenames (`.sdd-findings-{scope}.json`) are also detected as a fallback.
+If no `*-findings.json` file matching the current scope is found, backtrace prompts for a file path. Legacy filenames (`.sdd-findings-{scope}.json`) are also detected as a fallback. Backtrace's own output (`.backtrace-findings.json`) is excluded from auto-detection to prevent self-consumption.
+
+## Defect Catalog Integration
+
+When `specs/defect-catalog.md` exists at the git root, backtrace reads the relevant pattern section based on the input source:
+
+- `source: "audit"` findings read "Gap Audit Patterns" or "Spec Generation Weaknesses"
+- `source: "exploratory"` findings read "Exploratory Testing Probes"
+
+Each proposed addition's `pattern_match` field is set to the canonical pattern name when the input finding's `category` or `description` matches a known pattern. Set to `null` when no catalog exists or no match is found.
+
+This closes the defect-catalog feedback loop: the downstream collector ingests backtrace findings, the catalog accumulates recurring patterns, and backtrace stamps new findings with `pattern_match` when they match known patterns.
 
 ## Output Format
+
+### Findings file (`--output`)
+
+When `--output` is set, `<spec_dir>/.backtrace-findings.json` is written with one object per ProposedAddition+AuditorVerdict pair. Each object includes 17 fields: `source`, `scope`, `addition_id`, `finding_ref`, `category`, `description`, `addition_type`, `target_artifact`, `target_section`, `content`, `rationale`, `trace_certainty`, `verdict`, `reason`, `revision`, `classification`, `pattern_match`.
+
+The `classification` field (blocking/non-blocking) is emitted by the auditor independently of the verdict. When the auditor omits it, a fallback derives it from the verdict (approve/revise to blocking, reject to non-blocking) and logs a warning.
 
 ### Applied additions
 
@@ -116,6 +147,8 @@ If `spex-gates` is not installed, review-spec and review-plan are skipped with a
 | File | Read | Write |
 |------|------|-------|
 | `.*-findings.json` (e.g., `.gap-audit-spec-findings.json`) | yes (input) | no |
+| `.backtrace-findings.json` | no (excluded from auto-detect) | yes (`--output`) |
+| `specs/defect-catalog.md` | yes (pattern matching, optional) | no |
 | `spec.md` | yes | yes (additions) |
 | `plan.md` | yes (plan scope) | no (read-only) |
 | `tasks.md` | yes (plan scope) | yes (new tasks, plan scope) |

@@ -40,7 +40,7 @@ Parse `$ARGUMENTS` to extract the scope and optional spec directory path.
 
 **Parsing order:**
 
-1. Check whether `$ARGUMENTS` contains the string `--output` anywhere. If present, stop and report: "The `--output` flag is not supported by backtrace. Use gap-audit with `--output` to persist findings, then run backtrace against the persisted file."
+1. Check whether `$ARGUMENTS` contains `--output` as a standalone whitespace-delimited token (not as a substring of another flag). If present, set `OUTPUT_FLAG=true` and remove the `--output` token from the arguments string before continuing. If absent, set `OUTPUT_FLAG=false`.
 2. Split the remaining text by whitespace into tokens
 3. The first token is the scope argument
 4. If a second token exists, it is the spec directory path (used in Section 3, resolution step 1)
@@ -97,7 +97,7 @@ If any required files are missing, stop. Do not proceed to subsequent sections.
 
 Within the resolved spec directory, load findings:
 
-1. **Auto-detect**: Search the spec directory for files matching `.*-findings.json` (any source-named findings file). If multiple matches exist, prefer files whose name contains the current scope (e.g., `*-spec-findings.json` for spec scope, `*-plan-findings.json` for plan scope). If exactly one match exists, use it. If multiple scope-matching files exist, use the most recently modified. Also check for legacy filenames `.sdd-findings-{scope}.json` as a fallback.
+1. **Auto-detect**: Search the spec directory for files matching `.*-findings.json` (any source-named findings file). Exclude `.backtrace-findings.json` from candidates (backtrace's own output is not a valid input source). If multiple matches exist, prefer files whose name contains the current scope (e.g., `*-spec-findings.json` for spec scope, `*-plan-findings.json` for plan scope). If exactly one match exists, use it. If multiple scope-matching files exist, use the most recently modified. Also check for legacy filenames `.sdd-findings-{scope}.json` as a fallback.
 2. **Ask user**: If no auto-detected file exists, prompt the user: "No findings file found in `<spec_dir>`. Provide the path to a findings JSON file:"
 3. **Validate path**: If the user-provided path does not exist or is not readable, stop with: "Findings file not found: `<path>`". Also verify the path is within the project root (same validation as Section 3).
 4. **Read source metadata**: After loading findings, check if the first finding has a `source` field. If present, store the `source` and `scope` values for use in ProposedAddition output. If absent (legacy findings), set `source` to `"unknown"` and `scope` to the command's scope argument.
@@ -143,6 +143,25 @@ Read the spec artifacts and store their full content for use in the subagent pro
 - Read `<spec_dir>/tasks.md`
 
 ## Section 6: Core Tracing Logic
+
+### Step 0: Load defect catalog (if present)
+
+Resolve the defect catalog path: git root + `specs/defect-catalog.md` (convention, no config knob).
+
+```bash
+GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+CATALOG_PATH="$GIT_ROOT/specs/defect-catalog.md"
+```
+
+If the file exists, read the relevant section based on the input findings source (stored in Section 4):
+
+- `source: "audit"` → read the "Gap Audit Patterns" or "Spec Generation Weaknesses" section
+- `source: "exploratory"` → read the "Exploratory Testing Probes" section
+- `source: "unknown"` or unrecognized → read all pattern sections
+
+Extract the list of canonical pattern names from the loaded section(s). Store as `CATALOG_PATTERNS` for use in Step 5 (Produce ProposedAdditions).
+
+If the file does not exist, set `CATALOG_PATTERNS` to empty and log: "No defect catalog found at `$CATALOG_PATH`. pattern_match will be null for all findings."
 
 For each GapFinding in the findings array, trace it back to identify which spec item should have caught it.
 
@@ -208,6 +227,9 @@ For each ProposedAddition, assign a `trace_certainty` value based on how strongl
 | content | The actual text to add or amend |
 | rationale | Why this addition addresses the gap |
 | trace_certainty | One of: `direct`, `plausible`, `uncertain` |
+| pattern_match | Canonical pattern name from defect catalog if the input finding's `category` or `description` matches a pattern in `CATALOG_PATTERNS`, otherwise `null` |
+
+**Pattern matching**: When `CATALOG_PATTERNS` is non-empty, check whether the input finding's `category` or `description` (carried through from the GapFinding, not the proposed content) matches any canonical pattern name. Use semantic matching: the `category` or `description` text should refer to the same concept as the canonical pattern name. If a match is found, set `pattern_match` to the canonical name. If no match, set `pattern_match` to `null`.
 
 **Untraceable findings**: If a finding cannot be traced to any existing spec item, propose a new FR or AC rather than an amendment. Set the rationale to explain why no existing item covers this area. Set `trace_certainty` to `uncertain`.
 
@@ -290,8 +312,13 @@ Return your verdicts as a JSON array. Each element MUST have these fields:
   "addition_ref": "<addition_id of the ProposedAddition>",
   "verdict": "approve" or "reject" or "revise",
   "reason": "<reason for the verdict>",
-  "revision": "<suggested revision text, required when verdict is revise, null otherwise>"
+  "revision": "<suggested revision text, required when verdict is revise, null otherwise>",
+  "classification": "blocking" or "non-blocking"
 }
+
+classification: how serious is the underlying gap, independent of the verdict.
+- blocking: the spec was missing something that should have been required
+- non-blocking: the gap is minor or cosmetic
 
 IMPORTANT: Return ONLY the JSON array. No prose before or after.
 ```
@@ -328,6 +355,67 @@ The subagent returned something that looks like JSON but fails to parse. Set PAR
 
 ### Partial responses
 If the JSON array contains some valid and some malformed verdict objects, apply the valid verdicts and warn about the rest: "Warning: N of M verdicts could not be parsed. Valid verdicts applied, unparseable verdicts skipped."
+
+### Classification extraction
+
+For each parsed AuditorVerdict object, extract the `classification` field:
+
+- If `classification` is present and is `"blocking"` or `"non-blocking"`, use it as-is.
+- If `classification` is absent, null, or has an invalid value, derive it from the verdict:
+  - `approve` or `revise` → `"blocking"`
+  - `reject` → `"non-blocking"`
+  - Log: "Warning: auditor omitted classification for addition [addition_ref]; derived from verdict."
+
+## Section 8.5: Write Findings File
+
+**Condition**: This section runs only when `OUTPUT_FLAG=true`. If `OUTPUT_FLAG=false`, skip to Section 9.
+
+**Precondition**: Section 4 did not exit early with "No findings to trace." If Section 4 exited early, this section is never reached (the skill already exited).
+
+Write `<spec_dir>/.backtrace-findings.json` containing a JSON array with one object per ProposedAddition+AuditorVerdict pair.
+
+**Schema** (one object per pair):
+
+```json
+[
+  {
+    "source": "backtrace",
+    "scope": "<the scope argument from Section 2: spec or plan>",
+    "addition_id": "<ProposedAddition.addition_id>",
+    "finding_ref": "<ProposedAddition.finding_ref>",
+    "category": "<input finding's category, copied verbatim from the GapFinding identified by finding_ref>",
+    "description": "<input finding's description, copied verbatim from the GapFinding identified by finding_ref>",
+    "addition_type": "<ProposedAddition.addition_type>",
+    "target_artifact": "<ProposedAddition.target_artifact>",
+    "target_section": "<ProposedAddition.target_section>",
+    "content": "<ProposedAddition.content (or auditor revision text if verdict is revise)>",
+    "rationale": "<ProposedAddition.rationale>",
+    "trace_certainty": "<ProposedAddition.trace_certainty>",
+    "verdict": "<AuditorVerdict.verdict: approve, reject, or revise>",
+    "reason": "<AuditorVerdict.reason>",
+    "revision": "<AuditorVerdict.revision, or null>",
+    "classification": "<AuditorVerdict.classification: blocking or non-blocking>",
+    "pattern_match": "<ProposedAddition.pattern_match, or null>"
+  }
+]
+```
+
+**Field sourcing**:
+
+- `source`: always `"backtrace"` (literal)
+- `scope`: the run-level scope argument, not per-object
+- `category` and `description`: look up the input GapFinding by `finding_ref` index and copy its `category` and `description` fields verbatim
+- `content`: use the auditor's `revision` text when `verdict` is `"revise"`, otherwise use `ProposedAddition.content`
+- `classification`: the extracted value from Section 8's classification extraction step
+- All other fields: direct copy from the corresponding ProposedAddition or AuditorVerdict
+
+**When all proposals are rejected**: Write the file with all entries (rejected entries have `verdict: "reject"`). The file records what was proposed and decided, not just what was applied.
+
+**When no verdict exists for an addition** (auditor didn't return a verdict for it): Use the defaults from Section 9's "No verdict found" logic. Set `verdict` to `"approve"`, `reason` to `"no auditor verdict returned"`, `revision` to `null`, and `classification` to `"blocking"` (the fallback for the default `approve` verdict per Section 8's derivation rule).
+
+**When PARSE_FAILED is true**: The auditor failed entirely (empty response, non-JSON, or malformed JSON). Do not use the normal no-verdict defaults, which would misleadingly record every addition as approved. Instead, set `verdict` to `"error"`, `reason` to `"auditor parse failure"`, `revision` to `null`, and `classification` to `null`. This distinguishes auditor failure from a genuine no-verdict situation. Section 9 will skip all additions when PARSE_FAILED is true regardless.
+
+**Write the file before Section 9** so the record exists even if applying additions fails.
 
 ## Section 9: Apply Additions
 
